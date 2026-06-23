@@ -4,26 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MediRoute — AI Medical Companion</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230D9488'/%3E%3Cpath d='M50 22L30 38v16h10v24h20V54h10V38L50 22zm-8 46H32v6h36v-6H58z' fill='%23fff' fill-rule='evenodd'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A73E8'/%3E%3Cpath d='M50 22L30 38v16h10v24h20V54h10V38L50 22zm-8 46H32v6h36v-6H58z' fill='%23fff' fill-rule='evenodd'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #0D9488; --primary-hover: #0F766E;
-      --error: #DC2626; --warning: #D97706;
-      --surface: #FFFFFF; --surface-variant: #F3F2F0;
-      --on-surface: #1D1D1F; --on-surface-variant: #6B6B73;
-      --outline: #E6E5E3;
-      --font-display: 'Outfit', sans-serif;
-      --font-body: 'DM Sans', sans-serif;
+      --primary: #1A73E8; --primary-hover: #1557B0;
+      --error: #EA4335; --warning: #FBBC04;
+      --surface: #FFFBFE; --surface-variant: #F0F4F9;
+      --on-surface: #1F1F1F; --on-surface-variant: #5F6368;
+      --outline: #C4C7C5;
+      --font-display: 'Roboto Flex', sans-serif;
+      --font-body: 'Roboto Flex', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
-      --shadow-card: 0 1px 3px rgba(13,148,136,0.06), 0 1px 2px rgba(13,148,136,0.04);
-      --shadow-elevated: 0 4px 12px rgba(13,148,136,0.08), 0 2px 4px rgba(13,148,136,0.04);
-      --transition-fast: 180ms cubic-bezier(0.16,1,0.3,1); --transition-normal: 280ms cubic-bezier(0.16,1,0.3,1);
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 28px;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.08), 0 1px 3px 1px rgba(0,0,0,0.04);
+      --shadow-elevated: 0 1px 2px rgba(0,0,0,0.08), 0 2px 6px 2px rgba(0,0,0,0.04);
+      --transition-fast: 250ms cubic-bezier(0.2,0.0,0,1.0); --transition-normal: 300ms cubic-bezier(0.2,0.0,0,1.0);
     }
     .skip-link {
       position: absolute; top: -100px; left: 24px; z-index: 200;
@@ -35,23 +35,16 @@
     .skip-link:focus { top: 16px; outline: 2px solid var(--primary); outline-offset: 2px; }
     body {
       font-family: var(--font-body); color: var(--on-surface);
-      background: #FAF9F7; min-height: 100dvh;
+      background: #FFFBFE; min-height: 100dvh;
       display: flex; flex-direction: column; align-items: center;
       -webkit-font-smoothing: antialiased;
-    }
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-      opacity: 0.028;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     /* ── Top Bar ── */
     .top-bar {
       width: 100%; height: 64px; display: flex; align-items: center;
       justify-content: space-between; padding: 0 28px;
-      background: rgba(255,255,255,0.82); backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: var(--surface);
       border-bottom: 1px solid var(--outline);
       position: sticky; top: 0; z-index: 100;
     }
@@ -85,8 +78,7 @@
     }
     .phone-screen {
       width: 100%; height: 100%; overflow-y: auto;
-      padding-top: 40px; background: var(--surface-variant); position: relative;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+      padding-top: 40px; background: var(--surface); position: relative;
     }
     .tech-sidebar {
       width: 280px; flex-shrink: 0; background: var(--surface);
@@ -110,8 +102,7 @@
     .nav-bar {
       width: 100%; height: 72px; display: flex; align-items: center;
       justify-content: center; gap: 28px; padding: 0 28px;
-      background: rgba(255,255,255,0.82); backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: var(--surface);
       border-top: 1px solid var(--outline); position: sticky; bottom: 0; z-index: 100;
     }
     .nav-btn {
@@ -231,6 +222,14 @@
     .intake-col-jp .field-value { font-size: 14px; }
     .btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: background var(--transition-fast); }
     .btn-primary:hover { background: var(--primary-hover); }
+    .btn-text {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 8px 12px; background: none; border: none;
+      font-family: var(--font-body); font-size: 13px; font-weight: 600;
+      color: var(--primary); cursor: pointer; border-radius: var(--radius-sm);
+      transition: background var(--transition-fast);
+    }
+    .btn-text:hover { background: var(--surface-variant); }
     .form-tip { font-size: 11px; color: var(--on-surface-variant); text-align: center; padding: 8px; background: #FFF8E1; border-radius: var(--radius-sm); }
 
     /* ── Transition ── */
@@ -475,7 +474,7 @@
     }
     .hub-hero-text { flex: 1; }
     .hub-hero-greeting { font-size: 12px; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px; }
-    .hub-hero-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: -0.04em; line-height: 1.1; }
+    .hub-hero-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--primary); letter-spacing: -0.04em; line-height: 1.1; }
     .hub-hero-sub { font-size: 12px; color: var(--on-surface-variant); margin-top: 4px; max-width: 240px; line-height: 1.5; }
 
     .hub-emergency-cta {
@@ -576,7 +575,7 @@
       border-radius: var(--radius-md); cursor: pointer;
       transition: all var(--transition-fast); font-family: var(--font-body);
     }
-    .hub-quick-btn:hover { border-color: var(--primary); background: #F0FDFA; transform: translateY(-1px); }
+    .hub-quick-btn:hover { border-color: var(--primary); background: #E8F0FE; transform: translateY(-1px); }
     .hub-quick-btn:active { transform: translateY(0) scale(0.97); }
     .hub-quick-btn .ph { font-size: 22px; }
     .hub-quick-btn span { font-size: 11px; font-weight: 600; color: var(--on-surface); }
@@ -599,7 +598,7 @@
       color: var(--on-surface-variant); transition: all var(--duration-fast);
       border: 1px dashed var(--outline); font-family: var(--font-body);
     }
-    .hub-footer-action:hover { color: var(--primary); border-color: var(--primary); background: #F0FDFA; }
+    .hub-footer-action:hover { color: var(--primary); border-color: var(--primary); background: #E8F0FE; }
 
     /* ── Loading States: Skeleton Shimmer ── */
     @keyframes skeletonShimmer {
@@ -649,6 +648,8 @@
   <header class="top-bar">
     <div class="top-bar-left"><span class="logo">MediRoute</span></div>
     <div class="top-bar-right">
+      <button class="lang-toggle" id="langToggle">🌐 EN</button>
+      <button class="tech-toggle" id="techToggle">&lt;/&gt;</button>
       <span class="step-indicator" id="stepIndicator"></span>
     </div>
   </header>
@@ -950,6 +951,9 @@
       "pharmacy-translate":{ category:"translation", label:"Pharmacy Translation",  screens:["liveTranslation","receipt","endTranslation"], ctx:{urgencyLevel:5,severityColor:"primary"}},
       "doctor-translate":  { category:"translation", label:"Live Translation",      screens:["liveTranslation","commonPhrases","endTranslation"], ctx:{urgencyLevel:null,severityColor:"primary"}},
       "cost-info":         { category:"cost", label:"Cost & Insurance",             screens:["costEducation","insuranceInput","insuranceExplainer","receiptPreview","visaWaming","endCost"], ctx:{urgencyLevel:null,severityColor:"primary"}},
+      "personal-info":     { category:"info", label:"Personal Info",               screens:["personalInfo"], ctx:{urgencyLevel:null,severityColor:"primary",patientName:"Alex Chen"}},
+      "japan-guide":       { category:"info", label:"Japan Healthcare Guide",       screens:["japanGuide"], ctx:{urgencyLevel:null,severityColor:"primary"}},
+      "medical-qa":        { category:"info", label:"Medical Q&A",                  screens:["medicalQA"], ctx:{urgencyLevel:null,severityColor:"primary"}},
     };
 
     const CATEGORIES = [
@@ -1116,6 +1120,110 @@
         </div>`;
       },
 
+      personalInfo: () => {
+        const ctx = sessionState.pathContext;
+        return `
+        <div class="screen screen-info">
+          <div class="screen-header"><i class="ph ph-identification-badge" style="color:var(--primary);"></i> My Medical Profile</div>
+          <p class="screen-subtitle">Show this at any clinic or pharmacy in Japan</p>
+          <div class="claim-form-card" style="margin-top:12px;">
+            <div class="claim-section">
+              <div class="claim-section-title">Personal Details</div>
+              <div class="claim-field"><span>Name</span><span>${ctx.patientName||'Alex Chen'}</span></div>
+              <div class="claim-field"><span>Date of Birth</span><span>1992-03-15</span></div>
+              <div class="claim-field"><span>Blood Type</span><span>A+</span></div>
+              <div class="claim-field"><span>Passport</span><span>E12345678</span></div>
+            </div>
+            <div class="claim-section">
+              <div class="claim-section-title">Allergies</div>
+              <div class="claim-field"><span>Penicillin</span><span style="color:var(--error);"><i class="ph ph-x-circle"></i> Severe</span></div>
+              <div class="claim-field"><span>Sulfa drugs</span><span style="color:var(--warning);"><i class="ph ph-warning"></i> Mild rash</span></div>
+              <div class="claim-field"><span>Peanuts</span><span style="color:var(--error);"><i class="ph ph-x-circle"></i> Anaphylaxis</span></div>
+            </div>
+            <div class="claim-section">
+              <div class="claim-section-title">Current Medications</div>
+              <div class="claim-field"><span>Warfarin</span><span>5mg daily</span></div>
+            </div>
+            <div class="claim-section">
+              <div class="claim-section-title">Emergency Contact</div>
+              <div class="claim-field"><span>Name</span><span>Sarah Chen</span></div>
+              <div class="claim-field"><span>Phone</span><span>+1 415-555-0192</span></div>
+              <div class="claim-field"><span>Relation</span><span>Spouse</span></div>
+            </div>
+          </div>
+          <button class="btn-secondary" style="margin-top:12px;" onclick="showToast('Profile saved ✓')"><i class="ph ph-floppy-disk"></i> Edit Profile</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`;
+      },
+
+      japanGuide: () => `
+        <div class="screen screen-info">
+          <div class="screen-header"><i class="ph ph-info" style="color:var(--primary);"></i> Japan Healthcare Guide</div>
+          <p class="screen-subtitle">Essential info for tourists seeking medical care</p>
+          <div class="info-grid">
+            <div class="info-card" style="border-left:3px solid var(--error);">
+              <i class="ph ph-phone-call" style="color:var(--error);font-size:22px;margin-bottom:6px;"></i>
+              <h4>Call 119 for Emergency</h4>
+              <p>Free ambulance. Operators speak some English. Say "fire" (火事) if they don't understand.</p>
+            </div>
+            <div class="info-card" style="border-left:3px solid var(--warning);">
+              <i class="ph ph-clock" style="color:var(--warning);font-size:22px;margin-bottom:6px;"></i>
+              <h4>After-Hours Care</h4>
+              <p>Most clinics close at 6pm. Use ER for nights/weekends. Expect 36,000-59,000 yen.</p>
+            </div>
+            <div class="info-card" style="border-left:3px solid var(--primary);">
+              <i class="ph ph-identification-badge" style="color:var(--primary);font-size:22px;margin-bottom:6px;"></i>
+              <h4>Bring Your Passport</h4>
+              <p>All clinics require passport. Some may refuse treatment without ID. Have it ready.</p>
+            </div>
+            <div class="info-card" style="border-left:3px solid var(--primary);">
+              <i class="ph ph-translate" style="color:var(--primary);font-size:22px;margin-bottom:6px;"></i>
+              <h4>Language Barrier</h4>
+              <p>Few clinics have English staff. Use MediRoute's live translation during your visit.</p>
+            </div>
+            <div class="info-card" style="border-left:3px solid var(--primary);">
+              <i class="ph ph-currency-circle-dollar" style="color:var(--primary);font-size:22px;margin-bottom:6px;"></i>
+              <h4>Payment Upfront</h4>
+              <p>You pay first, claim later. Keep ALL receipts. NHI covers 70% if eligible.</p>
+            </div>
+            <div class="info-card" style="border-left:3px solid var(--primary);">
+              <i class="ph ph-first-aid" style="color:var(--primary);font-size:22px;margin-bottom:6px;"></i>
+              <h4>Walk-In Penalty</h4>
+              <p>Hospitals charge 7,000-11,000 yen extra without referral. Call ahead when possible.</p>
+            </div>
+          </div>
+          <button class="btn-text" style="margin-top:12px;" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      medicalQA: () => `
+        <div class="screen screen-info">
+          <div class="screen-header"><i class="ph ph-chat-circle-text" style="color:var(--primary);"></i> Medical Q&A</div>
+          <p class="screen-subtitle">Common questions from travelers in Japan</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="script-card">
+              <p style="font-weight:700;font-size:13px;margin-bottom:4px;"><i class="ph ph-question" style="color:var(--primary);"></i> Do I need insurance to see a doctor?</p>
+              <p style="font-size:12px;color:var(--on-surface-variant);">No — clinics treat anyone. But without insurance (NHI or travel), you pay 100% upfront. Travel insurance reimburses you later.</p>
+            </div>
+            <div class="script-card">
+              <p style="font-weight:700;font-size:13px;margin-bottom:4px;"><i class="ph ph-question" style="color:var(--primary);"></i> Can I use my prescription from home?</p>
+              <p style="font-size:12px;color:var(--on-surface-variant);">Generally no. Foreign prescriptions aren't valid in Japan. You need a Japanese doctor to issue a local prescription. Some drugs (Adderall, codeine) are illegal here.</p>
+            </div>
+            <div class="script-card">
+              <p style="font-weight:700;font-size:13px;margin-bottom:4px;"><i class="ph ph-question" style="color:var(--primary);"></i> Is ambulance transport really free?</p>
+              <p style="font-size:12px;color:var(--on-surface-variant);">Yes — 100% free. Japan's fire department runs ambulances. You never pay for the ride. Treatment at the hospital is billed separately.</p>
+            </div>
+            <div class="script-card">
+              <p style="font-weight:700;font-size:13px;margin-bottom:4px;"><i class="ph ph-question" style="color:var(--primary);"></i> What if I don't speak Japanese?</p>
+              <p style="font-size:12px;color:var(--on-surface-variant);">Use MediRoute's live translation. Emergency operators (119) have English support. For clinics, show your MediRoute personal profile — it has Japanese translations.</p>
+            </div>
+            <div class="script-card">
+              <p style="font-weight:700;font-size:13px;margin-bottom:4px;"><i class="ph ph-question" style="color:var(--primary);"></i> How much does a clinic visit cost?</p>
+              <p style="font-size:12px;color:var(--on-surface-variant);">Typical visit: 5,000-15,000 yen ($35-$105). ER: 36,000-59,000 yen. Your travel insurance should cover this — MediRoute helps generate claims.</p>
+            </div>
+          </div>
+          <button class="btn-text" style="margin-top:12px;" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
       endEmergency: () => `
         <div class="screen" style="padding:20px;background:var(--surface);min-height:100%;gap:16px;">
           <div style="padding:24px 0;">
@@ -1127,7 +1235,7 @@
             <div class="info-card" style="border-left:3px solid var(--primary);"><h4><i class="ph ph-identification-badge" style="margin-right:6px;color:var(--primary);"></i>At the hospital</h4><p>Show your passport and insurance card at reception. Emergency transport skips the walk-in penalty.</p></div>
             <div class="info-card" style="border-left:3px solid var(--success);"><h4><i class="ph ph-currency-circle-dollar" style="margin-right:6px;color:var(--success);"></i>After treatment</h4><p>Come back to MediRoute to scan your receipt and generate your insurance claim.</p></div>
           </div>
-          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       wait: () => `
@@ -1145,17 +1253,16 @@
       costEducation: () => `
         <div class="screen screen-info">
           <div class="screen-header"><i class="ph ph-currency-circle-dollar" style="margin-right:8px;color:var(--primary);"></i>Your Coverage</div>
-          <p class="screen-subtitle" id="coverageSubtitle">Based on your insurance: <strong>Not verified yet</strong></p>
+          <p class="screen-subtitle" id="coverageSubtitle">Based on your insurance: <strong style="color:var(--error);">Not verified yet</strong></p>
           <div class="info-grid" id="costCards">
             <div class="info-card cost-card"><i class="ph ph-ambulance"></i><h4>Ambulance</h4><p>0 yen — always free</p><p class="cost-status" style="color:var(--success);"><i class="ph ph-check-circle" style="font-size:10px;margin-right:3px;"></i>Free for everyone</p></div>
-            <div class="info-card cost-card"><i class="ph ph-hospital"></i><h4>Clinic Visit</h4><p class="cost-amount">5,000-15,000 yen</p><p class="cost-status" id="csClinic">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-currency-circle-dollar"></i><h4>ER Visit</h4><p class="cost-amount">36,000-59,000 yen</p><p class="cost-status" id="csER">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-warning-circle"></i><h4>Walk-in Penalty</h4><p class="cost-amount">7,000-11,000 yen</p><p class="cost-status" id="csPenalty">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-pill"></i><h4>Prescriptions</h4><p class="cost-amount">1,000-5,000 yen</p><p class="cost-status" id="csRx">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-hospital"></i><h4>Clinic Visit</h4><p class="cost-amount">5,000-15,000 yen</p><p class="cost-status" id="csClinic" style="color:var(--error);"><i class="ph ph-x-circle" style="font-size:10px;margin-right:3px;"></i>Not verified</p></div>
+            <div class="info-card cost-card"><i class="ph ph-currency-circle-dollar"></i><h4>ER Visit</h4><p class="cost-amount">36,000-59,000 yen</p><p class="cost-status" id="csER" style="color:var(--error);"><i class="ph ph-x-circle" style="font-size:10px;margin-right:3px;"></i>Not verified</p></div>
+            <div class="info-card cost-card"><i class="ph ph-warning-circle"></i><h4>Walk-in Penalty</h4><p class="cost-amount">7,000-11,000 yen</p><p class="cost-status" id="csPenalty" style="color:var(--error);"><i class="ph ph-x-circle" style="font-size:10px;margin-right:3px;"></i>Not verified</p></div>
+            <div class="info-card cost-card"><i class="ph ph-pill"></i><h4>Prescriptions</h4><p class="cost-amount">1,000-5,000 yen</p><p class="cost-status" id="csRx" style="color:var(--error);"><i class="ph ph-x-circle" style="font-size:10px;margin-right:3px;"></i>Not verified</p></div>
           </div>
           <button class="btn-primary" style="margin-top:10px;" id="btnAddInsurance"><i class="ph ph-shield-check"></i> Add Insurance Details</button>
-          <button class="btn-secondary" style="margin-top:6px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Continue</button>
-          <button class="btn-secondary" style="margin-top:6px;" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" style="margin-top:8px;" onclick="sessionState.currentStep===0?goToHub():navigateTo(sessionState.currentStep-1)"><i class="ph ph-arrow-left"></i> Back</button>
         </div>`,
 
       insuranceInput: (ctx) => `
@@ -1662,19 +1769,19 @@
       endMedication: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
           <div style="padding:24px 0;"><i class="ph ph-pill" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">Medication Check Complete</h2><p style="font-size:13px;color:var(--on-surface-variant);">You now know what's safe to bring and what needs a permit.</p></div>
-          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endTranslation: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
           <div style="padding:24px 0;"><i class="ph ph-chats" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">You're Ready to Communicate</h2><p style="font-size:13px;color:var(--on-surface-variant);">Use these phrases anytime during your visit. Come back if you need more help.</p></div>
-          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endCost: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
           <div style="padding:24px 0;"><i class="ph ph-currency-circle-dollar" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">You Know Your Costs</h2><p style="font-size:13px;color:var(--on-surface-variant);">Now you can plan your budget. Remember: always keep receipts for claims.</p></div>
-          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endClinic: () => `
@@ -1689,7 +1796,7 @@
             <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 Track your claim</h4><p>Allianz typically processes claims in 5-10 business days. Check your email for updates.</p></div>
             <div class="info-card" style="border-left:3px solid var(--warning);"><h4>⚠️ Remember</h4><p>If symptoms return or worsen, come back to MediRoute immediately.</p></div>
           </div>
-          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       howToGetRx: () => {
@@ -1704,12 +1811,12 @@
           var v=visits[i];
           h+='<div class="clinic-card" style="cursor:pointer" onclick="sessionState.pathContext.selectedClinic={name:\''+v.name+'\',specialty:\''+v.specialty+'\',phone:\'03-'+Math.floor(Math.random()*9000+1000)+'-'+Math.floor(Math.random()*9000+1000)+'\',hours:\'9:00-19:00\',language:\'English available\',distance:\''+(1+Math.random()*3).toFixed(1)+'km\'};navigateTo(sessionState.currentStep+1)"><div class="clinic-card-top"><div><h4>'+v.name+'</h4><span class="badge badge-internal">'+v.specialty+'</span></div><span style="font-size:12px;color:var(--on-surface-variant);">'+v.date+'</span></div><div class="clinic-meta"><span>📋 '+v.reason+'</span></div></div>';
         }
-        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">🏥 Your Past Visits</div><p class="screen-subtitle">Select a clinic to request a prescription</p><div class="clinic-list">'+h+'</div><button class="btn-primary" style="margin-top:12px;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-magnifying-glass"></i> Search Another Clinic</button><button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button></div>';
+        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">🏥 Your Past Visits</div><p class="screen-subtitle">Select a clinic to request a prescription</p><div class="clinic-list">'+h+'</div><button class="btn-primary" style="margin-top:12px;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-magnifying-glass"></i> Search Another Clinic</button><button class="btn-text" style="margin-top:4px;" onclick="sessionState.currentStep===0?goToHub():navigateTo(sessionState.currentStep-1)"><i class="ph ph-arrow-left"></i> Back</button></div>';
       },
 
       clinicDetail: (ctx) => {
         var clinic = sessionState.pathContext.selectedClinic || { name: 'Tokyo Midtown Medical', specialty: 'Internal Medicine', phone: '03-5413-0080', hours: '9:00-21:00', language: 'English available', distance: '2.1km' };
-        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">'+clinic.name+'</div><div class="clinic-detail-card"><div class="clinic-detail-row"><i class="ph ph-stethoscope"></i><div><span class="detail-label">Specialty</span><span class="detail-value">'+clinic.specialty+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-phone-call"></i><div><span class="detail-label">Phone</span><span class="detail-value">'+clinic.phone+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Hours</span><span class="detail-value">'+clinic.hours+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-globe"></i><div><span class="detail-label">Language</span><span class="detail-value">'+clinic.language+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-map-pin"></i><div><span class="detail-label">Distance</span><span class="detail-value">'+clinic.distance+'</span></div></div></div><div class="rx-doc-header" style="background:#fafaf5;border:1px solid var(--outline);border-radius:var(--radius-md);padding:12px;margin-top:12px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">📋 What you need</div><p style="font-size:12px;color:var(--on-surface-variant);line-height:1.6;">• Your foreign prescription or pill bottle<br>• Passport and insurance card<br>• The doctor will examine you and issue a Japanese prescription (処方箋)</p></div><button class="btn-primary" style="margin-top:12px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-file-text"></i> View Prescription</button><button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="navigateTo(sessionState.currentStep-1)"><i class="ph ph-arrow-left"></i> Back</button></div>';
+        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">'+clinic.name+'</div><div class="clinic-detail-card"><div class="clinic-detail-row"><i class="ph ph-stethoscope"></i><div><span class="detail-label">Specialty</span><span class="detail-value">'+clinic.specialty+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-phone-call"></i><div><span class="detail-label">Phone</span><span class="detail-value">'+clinic.phone+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Hours</span><span class="detail-value">'+clinic.hours+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-globe"></i><div><span class="detail-label">Language</span><span class="detail-value">'+clinic.language+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-map-pin"></i><div><span class="detail-label">Distance</span><span class="detail-value">'+clinic.distance+'</span></div></div></div><div class="rx-doc-header" style="background:#fafaf5;border:1px solid var(--outline);border-radius:var(--radius-md);padding:12px;margin-top:12px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">📋 What you need</div><p style="font-size:12px;color:var(--on-surface-variant);line-height:1.6;">• Your foreign prescription or pill bottle<br>• Passport and insurance card<br>• The doctor will examine you and issue a Japanese prescription (処方箋)</p></div><button class="btn-primary" style="margin-top:12px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-file-text"></i> View Prescription</button><button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="sessionState.currentStep===0?goToHub():navigateTo(sessionState.currentStep-1)"><i class="ph ph-arrow-left"></i> Back</button></div>';
       },
 
       preTravelInput: () => `
@@ -1867,7 +1974,7 @@
           <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
             ${phrases.map(([en,jp]) => `<div class="info-card" style="display:flex;justify-content:space-between;align-items:center;"><div><p style="font-size:13px;">"${en}"</p><p style="font-size:12px;color:var(--on-surface-variant);">${jp}</p></div><i class="ph ph-speaker-high" style="font-size:20px;color:var(--primary);"></i></div>`).join('')}
           </div>
-          <button class="btn-primary" style="margin-top:8px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-text" style="margin-top:8px;" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`;
       },
 
@@ -2086,10 +2193,10 @@
             `).join('')}
           </div>
           <div class="hub-quick-actions">
-            <div class="hub-quick-btn" data-route="chest-pain"><i class="ph ph-heartbeat" style="color:var(--error);"></i><span>Chest Pain</span></div>
-            <div class="hub-quick-btn" data-route="moderate-fever"><i class="ph ph-thermometer" style="color:var(--warning);"></i><span>Fever</span></div>
-            <div class="hub-quick-btn" data-route="pharmacy-translate"><i class="ph ph-translate" style="color:var(--primary);"></i><span>Translate</span></div>
-            <div class="hub-quick-btn" data-route="pre-travel-check"><i class="ph ph-airplane-takeoff" style="color:var(--primary);"></i><span>Travel Meds</span></div>
+            <div class="hub-quick-btn" data-route="personal-info"><i class="ph ph-identification-badge" style="color:var(--primary);"></i><span>My Info</span></div>
+            <div class="hub-quick-btn" data-route="cost-info"><i class="ph ph-shield-check" style="color:#137333;"></i><span>Insurance</span></div>
+            <div class="hub-quick-btn" data-route="japan-guide"><i class="ph ph-map-pin" style="color:var(--warning);"></i><span>Guide</span></div>
+            <div class="hub-quick-btn" data-route="medical-qa"><i class="ph ph-chat-circle-text" style="color:var(--primary);"></i><span>Q&A</span></div>
           </div>
           ${hasHistory ? `
             <div class="hub-recent-section">

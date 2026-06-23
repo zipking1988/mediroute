@@ -24,18 +24,19 @@ Each agent is a **separate mental mode** with its own system prompt. I search th
 "Act as the pitch agent: give me a 30-second demo opening"
 ```
 
-## Interactive Mock — v3 (Taste-v1 Redesign)
+## Interactive Mock — v4 (M3 Google Redesign)
 
 **File:** [`mediroute-mock.html`](mediroute-mock.html) — single-file, open in any browser. 0 dependencies, no build step.
 
 A clickable 15-path prototype simulating MediRoute's full product flow. Modern app-style home screen with **bento grid**, time-based greeting, quick actions, skeleton loading states, and prominent emergency CTA.
 
 **Design system:**
-- **Typography:** Outfit (display) + DM Sans (body) + JetBrains Mono (code) — no Inter, no system defaults
-- **Palette:** Single teal accent (#0D9488), refined red (#DC2626) / amber (#D97706) for severity
-- **Icons:** Phosphor exclusively — 166 usages, zero emojis in visible UI
-- **Surfaces:** Frosted glass top/nav bars, tinted teal shadows, SVG grain texture, warm off-white bg (#FAF9F7)
-- **Motion:** Spring-like cubic-bezier transitions (180-280ms), tactile :active scale(0.98), skeleton shimmer
+- **Typography:** Roboto Flex (display + body) + JetBrains Mono (code) — Google-native, no display face
+- **Palette:** Google Blue accent (#1A73E8), Material error (#EA4335) / warning (#FBBC04) for severity
+- **Icons:** Phosphor exclusively — 166 usages in templates
+- **Surfaces:** Solid M3 surface (#FFFBFE), clean backgrounds — no glass blur, no grain texture
+- **Shadows:** Neutral tinted (not teal), M3 elevation levels (0/1/2/3)
+- **Motion:** M3 standard easing (cubic-bezier 0.2,0,0,1.0), 250-300ms transitions, tactile :active scale(0.98)
 - **Layout:** Left-aligned headers, asymmetric bento grid (VARIANCE=8), airy spacing (DENSITY=4)
 
 ### Quick start
@@ -130,7 +131,7 @@ Coverage Cards → Insurance Input (provider + policy + coverage type) → Insur
 
 | File | What |
 |------|------|
-| [`mediroute-mock.html`](mediroute-mock.html) | **Interactive mock v3** — 15-path phone frame, taste-v1 redesign, bento hub, Phosphor icons, skeleton loaders |
+| [`mediroute-mock.html`](mediroute-mock.html) | **Interactive mock v4** — 15-path phone frame, M3 Google redesign, bento hub, Phosphor icons |
 | [`docs/hackathon-master.md`](docs/hackathon-master.md) | Hackathon master doc — all 5 verified docs consolidated |
 | [`docs/product-spec.md`](docs/product-spec.md) | Full MediRoute product spec (8 modules) |
 | [`docs/tech-plan.md`](docs/tech-plan.md) | Generated tech plan + stack recommendations |
@@ -143,6 +144,8 @@ Coverage Cards → Insurance Input (provider + policy + coverage type) → Insur
 | [`docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md) | v2 mock design spec (15 paths) |
 | [`docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md`](docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md) | v2 implementation plan |
 | [`docs/superpowers/plans/2026-06-23-mediroute-hub-redesign.md`](docs/superpowers/plans/2026-06-23-mediroute-hub-redesign.md) | Hub redesign plan — bento grid, taste-v1, Phosphor |
+| [`docs/superpowers/specs/2026-06-23-mediroute-mock-m3-redesign.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-m3-redesign.md) | v4 M3 redesign spec |
+| [`docs/superpowers/plans/2026-06-23-mediroute-mock-m3-redesign.md`](docs/superpowers/plans/2026-06-23-mediroute-mock-m3-redesign.md) | v4 M3 redesign implementation plan |
 | [`prompts/mediroute-brandkit-3x3.md`](prompts/mediroute-brandkit-3x3.md) | Brand kit image prompt — 3x3 identity deck |
 
 ## Setup
