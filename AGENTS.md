@@ -24,17 +24,35 @@ Each agent is a **separate mental mode** with its own system prompt. I search th
 "Act as the pitch agent: give me a 30-second demo opening"
 ```
 
-## Interactive Mock
+## Interactive Mock — v3 (Taste-v1 Redesign)
 
-**File:** [`mediroute-mock.html`](mediroute-mock.html) — single-file, open in any browser.
+**File:** [`mediroute-mock.html`](mediroute-mock.html) — single-file, open in any browser. 0 dependencies, no build step.
 
-A clickable 15-path prototype simulating MediRoute's full product flow. Hub entry → choose scenario → walk through screens. All pre-scripted, no backend.
+A clickable 15-path prototype simulating MediRoute's full product flow. Modern app-style home screen with **bento grid**, time-based greeting, quick actions, skeleton loading states, and prominent emergency CTA.
+
+**Design system:**
+- **Typography:** Outfit (display) + DM Sans (body) + JetBrains Mono (code) — no Inter, no system defaults
+- **Palette:** Single teal accent (#0D9488), refined red (#DC2626) / amber (#D97706) for severity
+- **Icons:** Phosphor exclusively — 166 usages, zero emojis in visible UI
+- **Surfaces:** Frosted glass top/nav bars, tinted teal shadows, SVG grain texture, warm off-white bg (#FAF9F7)
+- **Motion:** Spring-like cubic-bezier transitions (180-280ms), tactile :active scale(0.98), skeleton shimmer
+- **Layout:** Left-aligned headers, asymmetric bento grid (VARIANCE=8), airy spacing (DENSITY=4)
 
 ### Quick start
 
 ```bash
 open mediroute-mock.html
 ```
+
+### Hub home screen
+
+- **Greeting banner** — time-based ("Good morning") with "MediRoute" title
+- **Emergency CTA** — red "119" button top-right, one-tap to chest pain triage
+- **Bento grid** — 4 category cards (Emergency/Clinic/Medication/Translation) in 2x2 layout
+- **Expand buttons** — `+` on any card reveals sub-routes inline
+- **Quick actions** — Chest Pain, Fever, Translate, Travel Meds — one-tap shortcuts
+- **Search bar** — pill-style input, highlights matching category card on type
+- **Recent sessions** — last 3 with timestamps, tap to resume
 
 ### Keyboard shortcuts for demos
 
@@ -94,35 +112,38 @@ Coverage Cards → Insurance Input (provider + policy + coverage type) → Insur
 ```
 
 ### Interactive features
-- **Hub search** — type symptoms ("chest pain", "fever", "adderall", "how much") → auto-matches route
+- **Hub search** — pill-style input, highlights matching bento card on type, Enter to launch
 - **Chat triage** — 10 symptom trees with branching questions, contextual verdict + confidence
-- **🛡️ Insurance input** — select provider + policy + coverage → per-item cost cards green/red
+- **Insurance input** — select provider + policy + coverage → per-item cost cards green/red
 - **Clinic picker** — click any clinic card → downstream screens update
-- **📞 Mock booking** — 3-step call animation (Calling → Speaking → Booked!) → auto-transition
-- **📸 Scan & Translate** — mock camera scans 問診票, translates fields, auto-fills from chat
-- **🗣️ Contextual Live Translation** — phrases adapt to symptoms (fever, chest pain, headache, etc.)
-- **💊 Prescription → Pharmacy** — snap Rx → auto-detect drug → pharmacy → pickup code + map
-- **📋 処方箋** — realistic Japanese prescription with 4 meds, clickable dosage/usage details
-- **📋 Claim Generator** — receipt → structured claim form → download/send to insurer
-- **🏠 Back buttons** — every screen has a way back (Back / Back to Main Page)
+- **Mock booking** — 3-step call animation (Calling → Speaking → Booked) → auto-transition
+- **Scan & Translate** — mock camera scans medical questionnaire, translates fields, auto-fills from chat
+- **Contextual Live Translation** — phrases adapt to symptoms (fever, chest pain, headache, etc.)
+- **Prescription → Pharmacy** — snap Rx → auto-detect drug → pharmacy → pickup code + map
+- **Prescription document** — realistic Japanese prescription with 4 meds, clickable dosage/usage details
+- **Claim Generator** — receipt → structured claim form → download/send to insurer
+- **Skeleton loading states** — shimmer placeholders during pharmacy match, chat loading
+- **Back navigation** — every screen has a way back (Back / Back to Main Page)
 - **localStorage** — session survives refresh, shows "Continue?" prompt
 
 ## Reference Docs
 
 | File | What |
 |------|------|
-| [`mediroute-mock.html`](mediroute-mock.html) | 🎮 **Interactive mock v2** — 15-path phone frame simulator |
-| [`docs/hackathon-master.md`](docs/hackathon-master.md) | 🏆 **Hackathon master doc** — all 5 verified docs consolidated |
+| [`mediroute-mock.html`](mediroute-mock.html) | **Interactive mock v3** — 15-path phone frame, taste-v1 redesign, bento hub, Phosphor icons, skeleton loaders |
+| [`docs/hackathon-master.md`](docs/hackathon-master.md) | Hackathon master doc — all 5 verified docs consolidated |
 | [`docs/product-spec.md`](docs/product-spec.md) | Full MediRoute product spec (8 modules) |
 | [`docs/tech-plan.md`](docs/tech-plan.md) | Generated tech plan + stack recommendations |
-| [`docs/market-landscape-verified.md`](docs/market-landscape-verified.md) | Market landscape & competitive analysis (fact-checked ✅) |
-| [`docs/data-feasibility-verified.md`](docs/data-feasibility-verified.md) | Data & feasibility — API stack verified ✅ |
-| [`docs/impact-metrics-corrected.md`](docs/impact-metrics-corrected.md) | Impact & metrics — corrected version (math fixed ✅) |
-| [`docs/user-personas-validation-verified.md`](docs/user-personas-validation-verified.md) | User personas & problem validation (fact-checked ✅) |
-| [`docs/user-segments-pain-points-verified.md`](docs/user-segments-pain-points-verified.md) | Target users & pain points (fact-checked ✅) |
+| [`docs/market-landscape-verified.md`](docs/market-landscape-verified.md) | Market landscape & competitive analysis (fact-checked) |
+| [`docs/data-feasibility-verified.md`](docs/data-feasibility-verified.md) | Data & feasibility — API stack verified |
+| [`docs/impact-metrics-corrected.md`](docs/impact-metrics-corrected.md) | Impact & metrics — corrected version (math fixed) |
+| [`docs/user-personas-validation-verified.md`](docs/user-personas-validation-verified.md) | User personas & problem validation (fact-checked) |
+| [`docs/user-segments-pain-points-verified.md`](docs/user-segments-pain-points-verified.md) | Target users & pain points (fact-checked) |
 | [`docs/superpowers/specs/2026-06-23-mediroute-mock-design.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-design.md) | v1 mock design spec |
 | [`docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md) | v2 mock design spec (15 paths) |
 | [`docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md`](docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md) | v2 implementation plan |
+| [`docs/superpowers/plans/2026-06-23-mediroute-hub-redesign.md`](docs/superpowers/plans/2026-06-23-mediroute-hub-redesign.md) | Hub redesign plan — bento grid, taste-v1, Phosphor |
+| [`prompts/mediroute-brandkit-3x3.md`](prompts/mediroute-brandkit-3x3.md) | Brand kit image prompt — 3x3 identity deck |
 
 ## Setup
 

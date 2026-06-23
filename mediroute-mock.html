@@ -4,38 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MediRoute — AI Medical Companion</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230D9488'/%3E%3Cpath d='M50 22L30 38v16h10v24h20V54h10V38L50 22zm-8 46H32v6h36v-6H58z' fill='%23fff' fill-rule='evenodd'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #1A73E8; --primary-hover: #1557B0;
-      --error: #EA4335; --warning: #FBBC04;
-      --surface: #FFFFFF; --surface-variant: #F8F9FA;
-      --on-surface: #202124; --on-surface-variant: #5F6368;
-      --outline: #DADCE0;
-      --font-display: 'DM Sans', sans-serif;
-      --font-body: 'Roboto', sans-serif;
-      --font-mono: 'Roboto Mono', monospace;
-      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
-      --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-elevated: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-      --transition-fast: 150ms ease; --transition-normal: 250ms ease;
+      --primary: #0D9488; --primary-hover: #0F766E;
+      --error: #DC2626; --warning: #D97706;
+      --surface: #FFFFFF; --surface-variant: #F3F2F0;
+      --on-surface: #1D1D1F; --on-surface-variant: #6B6B73;
+      --outline: #E6E5E3;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --shadow-card: 0 1px 3px rgba(13,148,136,0.06), 0 1px 2px rgba(13,148,136,0.04);
+      --shadow-elevated: 0 4px 12px rgba(13,148,136,0.08), 0 2px 4px rgba(13,148,136,0.04);
+      --transition-fast: 180ms cubic-bezier(0.16,1,0.3,1); --transition-normal: 280ms cubic-bezier(0.16,1,0.3,1);
     }
+    .skip-link {
+      position: absolute; top: -100px; left: 24px; z-index: 200;
+      background: var(--primary); color: white; padding: 10px 20px;
+      border-radius: var(--radius-md); font-family: var(--font-body);
+      font-size: 14px; font-weight: 600; text-decoration: none;
+      transition: top 200ms ease;
+    }
+    .skip-link:focus { top: 16px; outline: 2px solid var(--primary); outline-offset: 2px; }
     body {
       font-family: var(--font-body); color: var(--on-surface);
-      background: #F1F3F4; min-height: 100dvh;
+      background: #FAF9F7; min-height: 100dvh;
       display: flex; flex-direction: column; align-items: center;
       -webkit-font-smoothing: antialiased;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     /* ── Top Bar ── */
     .top-bar {
-      width: 100%; height: 64px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--outline);
+      width: 100%; height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 28px;
+      background: rgba(255,255,255,0.82); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--outline);
       position: sticky; top: 0; z-index: 100;
     }
     .top-bar-left { display: flex; align-items: center; gap: 12px; }
@@ -58,7 +75,7 @@
     .phone-frame {
       width: 390px; height: 700px; border-radius: 48px;
       border: 8px solid #1a1a1c; background: var(--surface);
-      box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.25);
+      box-shadow: 0 0 0 2px #2D2D30, 0 24px 72px rgba(0,0,0,0.32);
       position: relative; overflow: hidden;
     }
     .phone-notch {
@@ -69,6 +86,7 @@
     .phone-screen {
       width: 100%; height: 100%; overflow-y: auto;
       padding-top: 40px; background: var(--surface-variant); position: relative;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
     }
     .tech-sidebar {
       width: 280px; flex-shrink: 0; background: var(--surface);
@@ -90,8 +108,10 @@
 
     /* ── Navigation Bar ── */
     .nav-bar {
-      width: 100%; height: 72px; display: flex; align-items: center; justify-content: center;
-      gap: 24px; padding: 0 24px; background: var(--surface);
+      width: 100%; height: 72px; display: flex; align-items: center;
+      justify-content: center; gap: 28px; padding: 0 28px;
+      background: rgba(255,255,255,0.82); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--outline); position: sticky; bottom: 0; z-index: 100;
     }
     .nav-btn {
@@ -125,7 +145,7 @@
 
     /* ── Chat ── */
     .screen-chat { background: var(--surface); padding-bottom: 0; height: 100%; }
-    .chat-header { padding: 12px 16px; font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--primary); border-bottom: 1px solid var(--outline); text-align: center; background: var(--surface); }
+    .chat-header { padding: 12px 16px; font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--primary); border-bottom: 1px solid var(--outline); text-align: left; background: var(--surface); }
     .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .chat-bubble { max-width: 85%; padding: 12px 14px; border-radius: var(--radius-lg); font-size: 14px; line-height: 1.5; }
     .chat-bubble-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: var(--radius-sm); }
@@ -214,9 +234,9 @@
     .form-tip { font-size: 11px; color: var(--on-surface-variant); text-align: center; padding: 8px; background: #FFF8E1; border-radius: var(--radius-sm); }
 
     /* ── Transition ── */
-    .screen-transition { justify-content: center; align-items: center; text-align: center; background: var(--surface); padding: 32px; gap: 16px; min-height: 100%; }
+    .screen-transition { justify-content: flex-start; align-items: flex-start; text-align: left; background: var(--surface); padding: 32px; gap: 20px; min-height: 100%; }
     .transition-icon { font-size: 56px; }
-    .screen-transition h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; line-height: 1.4; }
+    .screen-transition h2 { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -0.03em; }
     .screen-transition p { font-size: 13px; color: var(--on-surface-variant); line-height: 1.6; }
 
     /* ── Drug Interaction ── */
@@ -447,6 +467,157 @@
       50% { border-color: rgba(26,115,232,0.8); box-shadow: inset 0 0 20px 0 rgba(26,115,232,0.2); }
     }
     .scan-text { font-size: 14px; color: white; font-weight: 500; min-height: 20px; }
+
+    /* ── Hub: Modern App Home ── */
+    .hub-hero {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 4px 0 12px; gap: 16px;
+    }
+    .hub-hero-text { flex: 1; }
+    .hub-hero-greeting { font-size: 12px; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px; }
+    .hub-hero-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: -0.04em; line-height: 1.1; }
+    .hub-hero-sub { font-size: 12px; color: var(--on-surface-variant); margin-top: 4px; max-width: 240px; line-height: 1.5; }
+
+    .hub-emergency-cta {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; background: var(--error); color: white;
+      border-radius: var(--radius-lg); cursor: pointer; border: none;
+      font-family: var(--font-body); font-size: 13px; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(220,38,38,0.25);
+      transition: all var(--transition-fast);
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .hub-emergency-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220,38,38,0.35); }
+    .hub-emergency-cta:active { transform: translateY(0) scale(0.97); }
+    .hub-emergency-cta .ph { font-size: 22px; }
+
+    .hub-search-app {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; background: var(--surface);
+      border: 1px solid var(--outline); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xs); margin-bottom: 4px;
+      transition: all var(--transition-fast);
+    }
+    .hub-search-app:focus-within { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+    .hub-search-app input {
+      flex: 1; border: none; outline: none;
+      font-family: var(--font-body); font-size: 14px; background: transparent;
+    }
+    .hub-search-app .ph { color: var(--on-surface-variant); font-size: 18px; }
+
+    .hub-section-title {
+      font-size: 10px; color: var(--on-surface-variant);
+      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+      margin: 20px 0 10px; font-family: var(--font-mono);
+    }
+
+    .hub-bento {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 10px;
+    }
+    .hub-bento-card {
+      background: var(--surface); border: 1px solid var(--outline);
+      border-radius: var(--radius-lg); padding: 18px 16px;
+      cursor: pointer; transition: all var(--transition-fast);
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative; overflow: hidden;
+    }
+    .hub-bento-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-color: var(--primary); }
+    .hub-bento-card:active { transform: translateY(0) scale(0.98); }
+    .hub-bento-card.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 16px; padding: 20px; }
+    .hub-bento-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .hub-bento-label {
+      font-family: var(--font-display); font-size: 15px; font-weight: 700;
+      letter-spacing: -0.02em; color: var(--on-surface);
+    }
+    .hub-bento-count {
+      font-size: 11px; color: var(--on-surface-variant);
+      font-family: var(--font-mono); font-weight: 500;
+    }
+    .hub-bento-subtitle {
+      font-size: 11px; color: var(--on-surface-variant); line-height: 1.5;
+    }
+    .hub-bento-expand {
+      position: absolute; top: 12px; right: 14px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--surface-variant); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer; color: var(--on-surface-variant);
+      transition: all var(--transition-fast);
+      font-family: var(--font-mono); font-weight: 700;
+    }
+    .hub-bento-expand:hover { background: var(--primary); color: white; }
+    .hub-bento-subs {
+      display: none; padding-top: 4px;
+      border-top: 1px solid var(--outline); margin-top: 4px;
+    }
+    .hub-bento-subs.open { display: block; }
+    .hub-bento-subitem {
+      padding: 7px 0; font-size: 12px; cursor: pointer;
+      color: var(--on-surface-variant); transition: all var(--duration-fast);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hub-bento-subitem:hover { color: var(--primary); padding-left: 4px; }
+    .hub-bento-subitem::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--outline); flex-shrink: 0; }
+    .hub-bento-subitem:hover::before { background: var(--primary); }
+
+    .hub-quick-actions {
+      display: flex; gap: 8px; margin-top: 4px;
+    }
+    .hub-quick-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 14px 8px; background: var(--surface); border: 1px solid var(--outline);
+      border-radius: var(--radius-md); cursor: pointer;
+      transition: all var(--transition-fast); font-family: var(--font-body);
+    }
+    .hub-quick-btn:hover { border-color: var(--primary); background: #F0FDFA; transform: translateY(-1px); }
+    .hub-quick-btn:active { transform: translateY(0) scale(0.97); }
+    .hub-quick-btn .ph { font-size: 22px; }
+    .hub-quick-btn span { font-size: 11px; font-weight: 600; color: var(--on-surface); }
+
+    .hub-recent-section { margin-top: 20px; }
+    .hub-recent-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      cursor: pointer; border-radius: var(--radius-sm);
+      transition: all var(--duration-fast);
+    }
+    .hub-recent-item:hover { background: var(--surface-variant); }
+    .hub-recent-item .ph { color: var(--primary); font-size: 16px; flex-shrink: 0; }
+    .hub-recent-item-label { font-size: 12px; font-weight: 500; }
+    .hub-recent-item-time { font-size: 10px; color: var(--on-surface-variant); margin-left: auto; }
+
+    .hub-footer-action {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px; margin-top: 16px; cursor: pointer;
+      border-radius: var(--radius-md); font-size: 12px; font-weight: 600;
+      color: var(--on-surface-variant); transition: all var(--duration-fast);
+      border: 1px dashed var(--outline); font-family: var(--font-body);
+    }
+    .hub-footer-action:hover { color: var(--primary); border-color: var(--primary); background: #F0FDFA; }
+
+    /* ── Loading States: Skeleton Shimmer ── */
+    @keyframes skeletonShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface-variant) 25%, #e8e7e5 50%, var(--surface-variant) 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s ease-in-out infinite;
+      border-radius: var(--radius-sm);
+    }
+    .skeleton-text { height: 14px; width: 80%; margin-bottom: 10px; }
+    .skeleton-text.short { width: 50%; }
+    .skeleton-card { height: 60px; width: 100%; margin-bottom: 8px; }
+    .skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+    .skeleton-chip { height: 32px; width: 90px; border-radius: 20px; }
+
     @media (max-width: 767px) {
       .top-bar { padding: 0 12px; height: 56px; }
       .logo { font-size: 17px; }
@@ -507,28 +678,28 @@
     // ══════════════════════════════════════════
     const clinics = {
       emergency: [
-        { name: "St. Luke's International", specialty: "Emergency", language: "🇬🇧 English", distance: "1.2km", hours: "24h", phone: "03-5550-7120" },
-        { name: "Tokyo Medical University", specialty: "Emergency", language: "🇬🇧 English available", distance: "2.8km", hours: "24h", phone: "03-3342-6111" },
-        { name: "JCHO Tokyo Yamate", specialty: "Emergency", language: "🇯🇵 Japanese only", distance: "3.5km", hours: "24h", phone: "03-3205-7211" },
+        { name: "St. Luke's International", specialty: "Emergency", language: "EN English", distance: "1.2km", hours: "24h", phone: "03-5550-7120" },
+        { name: "Tokyo Medical University", specialty: "Emergency", language: "EN English available", distance: "2.8km", hours: "24h", phone: "03-3342-6111" },
+        { name: "JCHO Tokyo Yamate", specialty: "Emergency", language: "JP Japanese only", distance: "3.5km", hours: "24h", phone: "03-3205-7211" },
       ],
       internal: [
-        { name: "Shinjuku Clinic", specialty: "Internal Medicine", language: "🇬🇧 English", distance: "0.8km", hours: "9:00-19:00", phone: "03-3350-1212" },
-        { name: "Tokyo Midtown Medical", specialty: "Internal Medicine", language: "🇬🇧 English available", distance: "2.1km", hours: "9:00-21:00", phone: "03-5413-0080" },
+        { name: "Shinjuku Clinic", specialty: "Internal Medicine", language: "EN English", distance: "0.8km", hours: "9:00-19:00", phone: "03-3350-1212" },
+        { name: "Tokyo Midtown Medical", specialty: "Internal Medicine", language: "EN English available", distance: "2.1km", hours: "9:00-21:00", phone: "03-5413-0080" },
       ],
       pediatric: [
-        { name: "National Center for Child Health", specialty: "Pediatrics", language: "🇬🇧 English", distance: "3.0km", hours: "24h", phone: "03-3416-0181" },
-        { name: "Tokyo Children's Clinic", specialty: "Pediatrics", language: "🇬🇧 Some English", distance: "1.5km", hours: "9:00-18:00", phone: "03-3355-2200" },
+        { name: "National Center for Child Health", specialty: "Pediatrics", language: "EN English", distance: "3.0km", hours: "24h", phone: "03-3416-0181" },
+        { name: "Tokyo Children's Clinic", specialty: "Pediatrics", language: "EN Some English", distance: "1.5km", hours: "9:00-18:00", phone: "03-3355-2200" },
       ],
       dental: [
-        { name: "Shinjuku Dental Office", specialty: "Dentistry", language: "🇬🇧 English", distance: "0.5km", hours: "10:00-19:00", phone: "03-3356-7890" },
+        { name: "Shinjuku Dental Office", specialty: "Dentistry", language: "EN English", distance: "0.5km", hours: "10:00-19:00", phone: "03-3356-7890" },
       ],
       orthopedics: [
-        { name: "Tokyo Sports Medicine Clinic", specialty: "Orthopedics", language: "🇬🇧 Some English", distance: "2.5km", hours: "9:00-18:00", phone: "03-3400-1111" },
+        { name: "Tokyo Sports Medicine Clinic", specialty: "Orthopedics", language: "EN Some English", distance: "2.5km", hours: "9:00-18:00", phone: "03-3400-1111" },
       ],
       pharmacy: [
-        { name: "Shinjuku Pharmacy", specialty: "Pharmacy", language: "🇬🇧 English pharmacist", distance: "0.6km", hours: "9:00-22:00", phone: "03-3350-9999" },
-        { name: "Matsumoto Kiyoshi", specialty: "Pharmacy", language: "🇯🇵 Japanese only", distance: "0.8km", hours: "10:00-21:00", phone: "03-3351-2222" },
-        { name: "Tomod's Shinjuku", specialty: "Pharmacy", language: "🇬🇧 Some English", distance: "1.0km", hours: "9:00-23:00", phone: "03-3352-3333" },
+        { name: "Shinjuku Pharmacy", specialty: "Pharmacy", language: "EN English pharmacist", distance: "0.6km", hours: "9:00-22:00", phone: "03-3350-9999" },
+        { name: "Matsumoto Kiyoshi", specialty: "Pharmacy", language: "JP Japanese only", distance: "0.8km", hours: "10:00-21:00", phone: "03-3351-2222" },
+        { name: "Tomod's Shinjuku", specialty: "Pharmacy", language: "EN Some English", distance: "1.0km", hours: "9:00-23:00", phone: "03-3352-3333" },
       ],
     };
 
@@ -782,11 +953,11 @@
     };
 
     const CATEGORIES = [
-      { id:"emergency",  icon:"🚨", label:"Emergency",     count:4, color:"var(--error)",   routeOrder:["chest-pain","bleeding","head-injury","child-emergency"]},
-      { id:"clinic",     icon:"🏥", label:"Clinic Visit",  count:4, color:"var(--warning)", routeOrder:["moderate-fever","mild-symptoms","injury","dental"]},
-      { id:"medication", icon:"💊", label:"Medication",    count:4, color:"#9334E6",        routeOrder:["get-prescription","drug-interaction","lost-medication","pre-travel-check"]},
-      { id:"translation",icon:"🗣️", label:"Translation",  count:2, color:"#00897B",        routeOrder:["pharmacy-translate","doctor-translate"]},
-      { id:"cost",       icon:"💰", label:"Cost & Claims", count:1, color:"var(--primary)", routeOrder:["cost-info"]},
+      { id:"emergency",  icon:"ph ph-ambulance", label:"Emergency",     count:4, color:"var(--error)",   routeOrder:["chest-pain","bleeding","head-injury","child-emergency"]},
+      { id:"clinic",     icon:"ph ph-hospital", label:"Clinic Visit",  count:4, color:"var(--warning)", routeOrder:["moderate-fever","mild-symptoms","injury","dental"]},
+      { id:"medication", icon:"ph ph-pill", label:"Medication",    count:4, color:"var(--primary)", routeOrder:["get-prescription","drug-interaction","lost-medication","pre-travel-check"]},
+      { id:"translation",icon:"ph ph-translate", label:"Translation",  count:2, color:"var(--primary)", routeOrder:["pharmacy-translate","doctor-translate"]},
+      { id:"cost",       icon:"ph ph-currency-circle-dollar", label:"Cost & Claims", count:1, color:"var(--primary)", routeOrder:["cost-info"]},
     ];
 
     // ══════════════════════════════════════════
@@ -863,78 +1034,67 @@
         }
         var typingHTML = ce.verdict ? '' : '<div class="chat-bubble chat-bubble-assistant" id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
         var placeholder = ce.currentNode ? 'Tap an option or type your answer...' : 'Describe your symptoms...';
-        return '<div class="screen screen-chat"><div class="chat-header">MediRoute</div><div class="chat-messages" id="chatMessages">' + msgs + verdictHTML + typingHTML + '</div><div class="chat-input-bar" id="chatInputBar"><input type="text" id="chatInput" placeholder="' + placeholder + '" autofocus><button id="chatSend"><i class="ph ph-paper-plane-tilt"></i></button></div></div>';
+        return '<div class="screen screen-chat"><div class="chat-header"><i class="ph ph-stethoscope" style="margin-right:8px;"></i>MediRoute Triage</div><div class="chat-messages" id="chatMessages">' + msgs + verdictHTML + typingHTML + '</div><div class="chat-input-bar" id="chatInputBar"><input type="text" id="chatInput" placeholder="' + placeholder + '" autofocus><button id="chatSend"><i class="ph ph-paper-plane-tilt"></i></button></div></div>';
       },
 
       triageEmergency: (ctx) => `
         <div class="screen screen-triage">
-          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>I've analyzed your symptoms. This requires immediate attention.</p></div>
-          <div class="severity-card">
-            <div class="severity-badge">🚨 Severity ${ctx.urgencyLevel} — Emergency</div>
-            <h2>CALL 119 IMMEDIATELY</h2>
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:20px;"><p>I've analyzed your symptoms. This requires immediate attention.</p></div>
+          <div class="severity-card" style="border:2px solid var(--error);">
+            <div class="severity-badge" style="background:var(--error);color:white;"><i class="ph ph-ambulance" style="margin-right:6px;"></i>Severity ${ctx.urgencyLevel} — Emergency</div>
+            <h2 style="color:var(--error);font-size:20px;">CALL 119 IMMEDIATELY</h2>
             <p class="severity-reasoning">Chest pain + difficulty breathing requires immediate emergency care</p>
-            <div class="route-label">Route A: Call 119 now</div>
-            <button class="btn-119 pulsing" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-phone-call"></i> CALL 119</button>
-            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>Ambulances in Japan are 100% FREE — don't hesitate to call.</span></div>
+            <div class="route-label" style="background:var(--emergency-subtle);color:var(--error);">Route A: Call 119 now</div>
+            <button class="btn-119 pulsing" style="background:var(--error);color:white;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-phone-call"></i> CALL 119</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:var(--success);"></i><span>Ambulances in Japan are 100% free — don't hesitate to call.</span></div>
           </div>
         </div>`,
 
       call119: (ctx) => `
-        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+        <div class="screen" style="padding:20px;background:var(--surface);min-height:100%;gap:16px;">
           <div class="emergency-call-header">
-            <div class="ec-status" id="ecStatus">📞 Calling 119...</div>
+            <div class="ec-status" id="ecStatus"><i class="ph ph-phone-call" style="margin-right:8px;"></i>Calling 119...</div>
             <div class="ec-timer" id="ecTimer">00:03</div>
           </div>
           <div class="ec-progress">
-            <div class="ec-step active" id="ecs1">📞 Dialing emergency services...</div>
-            <div class="ec-step" id="ecs2">🔗 Connected to operator</div>
-            <div class="ec-step" id="ecs3">📋 Sharing your location</div>
-            <div class="ec-step" id="ecs4">🚑 Ambulance dispatched</div>
+            <div class="ec-step active" id="ecs1"><i class="ph ph-phone-outgoing" style="margin-right:6px;"></i>Dialing emergency services...</div>
+            <div class="ec-step" id="ecs2"><i class="ph ph-link" style="margin-right:6px;"></i>Connected to operator</div>
+            <div class="ec-step" id="ecs3"><i class="ph ph-map-pin" style="margin-right:6px;"></i>Sharing your location</div>
+            <div class="ec-step" id="ecs4"><i class="ph ph-ambulance" style="margin-right:6px;"></i>Ambulance dispatched</div>
           </div>
           <div class="ec-instructions" id="ecInstructions" style="display:none;">
-            <div style="text-align:center;padding:12px;">
-              <div style="font-size:36px;">🚑</div>
-              <h3 style="font-family:var(--font-display);font-size:16px;margin:8px 0;">Ambulance is on the way</h3>
-              <p style="font-size:12px;color:var(--on-surface-variant);">ETA: ~7 minutes</p>
+            <div style="padding:12px 0;">
+              <div style="padding:16px;background:var(--accent-subtle);border-radius:var(--radius-lg);text-align:left;border:1px solid var(--primary);">
+                <h3 style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--primary);"><i class="ph ph-ambulance" style="margin-right:8px;"></i>Ambulance is on the way</h3>
+                <p style="font-size:12px;color:var(--on-surface-variant);">ETA: approximately 7 minutes</p>
+              </div>
             </div>
             <div class="info-grid" style="grid-template-columns:1fr;">
-              <div class="info-card" style="border-left:3px solid var(--error);"><h4>🧍 Wait outside</h4><p>Go to the street / lobby. Make yourself visible. Wave if you see the ambulance.</p></div>
-              <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 Have ready</h4><p>Passport, insurance card, list of medications you take.</p></div>
-              <div class="info-card" style="border-left:3px solid var(--warning);"><h4>🔔 Stay on the line</h4><p>The operator may stay on the phone with you. Don't hang up.</p></div>
+              <div class="info-card" style="border-left:3px solid var(--error);"><h4><i class="ph ph-person" style="margin-right:6px;color:var(--error);"></i>Wait outside</h4><p>Go to the street or lobby. Make yourself visible. Wave if you see the ambulance.</p></div>
+              <div class="info-card" style="border-left:3px solid var(--primary);"><h4><i class="ph ph-identification-badge" style="margin-right:6px;color:var(--primary);"></i>Have ready</h4><p>Passport, insurance card, list of medications you take.</p></div>
+              <div class="info-card" style="border-left:3px solid var(--warning);"><h4><i class="ph ph-phone-call" style="margin-right:6px;color:var(--warning);"></i>Stay on the line</h4><p>The operator may stay on the phone with you. Don't hang up.</p></div>
             </div>
           </div>
           <div class="translate-mini" id="ecTranslate" style="display:none;">
             <div class="translate-mini-header"><i class="ph ph-translate"></i> Talk to 119 Operator</div>
-            <div class="lt-mic-area"><div class="lt-mic-btn pulsing" onclick="showToast('🎤 Listening...')"><i class="ph ph-microphone"></i></div><p class="lt-mic-hint">Tap to speak to operator</p></div>
-            <div class="lt-bubbles">
-              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 救急車をお願いします')"><span>I need an ambulance</span><i class="ph ph-speaker-high"></i></div>
-              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 救急車をお願いします')"><span>救急車をお願いします</span><i class="ph ph-speaker-high"></i></div>
-            </div>
-            <div class="lt-bubbles">
-              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 胸が痛いです。息が苦しいです。')"><span>I have chest pain. Can't breathe.</span><i class="ph ph-speaker-high"></i></div>
-              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 胸が痛いです。息が苦しいです。')"><span>胸が痛いです。息が苦しいです。</span><i class="ph ph-speaker-high"></i></div>
-            </div>
-            <div class="lt-bubbles">
-              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 私は〇〇にいます。')"><span>I'm at [hotel/address]</span><i class="ph ph-speaker-high"></i></div>
-              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 私は〇〇にいます。')"><span>私は〇〇にいます。</span><i class="ph ph-speaker-high"></i></div>
-            </div>
-            <div class="lt-bubbles">
-              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 外国人です。日本語は話せません。')"><span>I'm a foreigner. No Japanese.</span><i class="ph ph-speaker-high"></i></div>
-              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 外国人です。日本語は話せません。')"><span>外国人です。日本語は話せません。</span><i class="ph ph-speaker-high"></i></div>
-            </div>
+            <div class="lt-mic-area"><div class="lt-mic-btn pulsing" onclick="showToast('Listening...')"><i class="ph ph-microphone"></i></div><p class="lt-mic-hint">Tap to speak to operator</p></div>
+            <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('Speaking: I need an ambulance')"><span>I need an ambulance</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('Speaking')"><span>救急車をお願いします</span><i class="ph ph-speaker-high"></i></div></div>
+            <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('Speaking')"><span>I have chest pain. Can't breathe.</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('Speaking')"><span>胸が痛いです。息が苦しいです。</span><i class="ph ph-speaker-high"></i></div></div>
+            <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('Speaking')"><span>I'm at [hotel/address]</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('Speaking')"><span>私は〇〇にいます。</span><i class="ph ph-speaker-high"></i></div></div>
+            <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('Speaking')"><span>I'm a foreigner. No Japanese.</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('Speaking')"><span>外国人です。日本語は話せません。</span><i class="ph ph-speaker-high"></i></div></div>
           </div>
         </div>`,
 
       triageUrgent: (ctx) => `
         <div class="screen screen-triage">
-          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>I've analyzed your symptoms. This needs attention but is not life-threatening.</p></div>
-          <div class="severity-card" style="border-color:var(--warning);">
-            <div class="severity-badge" style="background:var(--warning);color:#202124;">⚠️ Severity ${ctx.urgencyLevel} — Urgent</div>
-            <h2 style="color:var(--warning);">Find a Clinic Today</h2>
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:20px;"><p>I've analyzed your symptoms. This needs attention but is not life-threatening.</p></div>
+          <div class="severity-card" style="border:2px solid var(--warning);">
+            <div class="severity-badge" style="background:var(--warning);color:var(--on-surface);"><i class="ph ph-warning" style="margin-right:6px;"></i>Severity ${ctx.urgencyLevel} — Urgent</div>
+            <h2 style="color:var(--warning);font-size:20px;">Find a Clinic Today</h2>
             <p class="severity-reasoning">Your symptoms require medical attention within 24 hours</p>
-            <div class="route-label" style="background:#FFF8E1;color:#B06000;">Route B: Clinic today</div>
-            <button class="btn-primary" style="margin:12px 0;" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-hospital"></i> Find Nearby Clinic</button>
-            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>Clinic visit: ¥5,000–¥15,000 (~$35–$105). Insurance reimburses you.</span></div>
+            <div class="route-label" style="background:var(--warning-subtle);color:var(--warning);">Route B: Clinic today</div>
+            <button class="btn-primary" style="margin:14px 0;" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-hospital"></i> Find Nearby Clinic</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:var(--success);"></i><span>Clinic visit: 5,000-15,000 yen (~$35-$105). Insurance reimburses you.</span></div>
           </div>
         </div>`,
 
@@ -943,62 +1103,64 @@
         return `
         <div class="screen screen-triage">
           ${summary ? `<div class="chat-history-summary"><span>You told us:</span> ${summary}</div>` : ''}
-          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>Your symptoms appear mild. No emergency — but let's keep an eye on it.</p></div>
-          <div class="severity-card" style="border-color:var(--primary);">
-            <div class="severity-badge" style="background:var(--primary);">ℹ️ Severity ${ctx.urgencyLevel} — Semi-Urgent</div>
-            <h2 style="color:var(--primary);">Monitor for 48 Hours</h2>
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:20px;"><p>Your symptoms appear mild. No emergency — but let's keep an eye on it.</p></div>
+          <div class="severity-card" style="border:2px solid var(--primary);">
+            <div class="severity-badge" style="background:var(--primary);color:white;"><i class="ph ph-info" style="margin-right:6px;"></i>Severity ${ctx.urgencyLevel} — Semi-Urgent</div>
+            <h2 style="color:var(--primary);font-size:20px;">Monitor for 48 Hours</h2>
             <p class="severity-reasoning">Your symptoms can likely be managed with self-care</p>
-            <div class="route-label" style="background:#E8F0FE;color:var(--primary);">Route C: Clinic within 48h</div>
-            <button class="btn-primary" style="margin:8px 0;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-hospital"></i> Self-Care Tips</button>
-            <button class="btn-primary" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-first-aid"></i> Find a Clinic</button>
-            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>If symptoms worsen, come back. Clinic visit: ~$35–$105.</span></div>
+            <div class="route-label" style="background:var(--accent-subtle);color:var(--primary);">Route C: Clinic within 48h</div>
+            <button class="btn-secondary" style="margin:10px 0;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-first-aid"></i> Self-Care Tips</button>
+            <button class="btn-primary" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-hospital"></i> Find a Clinic</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:var(--success);"></i><span>If symptoms worsen, come back. Clinic visit: ~$35-$105.</span></div>
           </div>
         </div>`;
       },
 
       endEmergency: () => `
-        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div style="text-align:center;padding:20px 0;">
-            <div style="font-size:48px;">🏥</div>
-            <h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You're in good hands</h2>
+        <div class="screen" style="padding:20px;background:var(--surface);min-height:100%;gap:16px;">
+          <div style="padding:24px 0;">
+            <i class="ph ph-heartbeat" style="font-size:48px;color:var(--primary);"></i>
+            <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">You're in good hands</h2>
             <p style="font-size:13px;color:var(--on-surface-variant);">The ambulance will take you to the nearest emergency hospital. The medical team is prepared.</p>
           </div>
           <div class="info-grid" style="grid-template-columns:1fr;">
-            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 At the hospital</h4><p>Show your passport and insurance card at reception. Emergency transport skips the walk-in penalty.</p></div>
-            <div class="info-card" style="border-left:3px solid #34A853;"><h4>💰 After treatment</h4><p>Come back to MediRoute to scan your receipt and generate your insurance claim.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4><i class="ph ph-identification-badge" style="margin-right:6px;color:var(--primary);"></i>At the hospital</h4><p>Show your passport and insurance card at reception. Emergency transport skips the walk-in penalty.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--success);"><h4><i class="ph ph-currency-circle-dollar" style="margin-right:6px;color:var(--success);"></i>After treatment</h4><p>Come back to MediRoute to scan your receipt and generate your insurance claim.</p></div>
           </div>
           <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       wait: () => `
+        <div class="screen screen-info">
+          <div class="screen-header"><i class="ph ph-ambulance" style="margin-right:8px;color:var(--error);"></i>While You Wait</div>
           <p class="screen-subtitle">Here's what you need to know while you wait for the ambulance.</p>
           <div class="info-grid">
-            <div class="info-card"><i class="ph ph-ambulance"></i><h4>Ambulances are FREE</h4><p>¥0 for everyone, including tourists. Source: FDMA</p></div>
-            <div class="info-card"><i class="ph ph-identification-badge"></i><h4>At the hospital</h4><p>Show your passport and insurance card. Emergency transport skips the ¥7,000–¥11,000 walk-in penalty.</p></div>
-            <div class="info-card"><i class="ph ph-translate"></i><h4>Language support</h4><p>Most ERs have interpreter tablets. Ask for "tsuyaku" (通訳).</p></div>
-            <div class="info-card"><i class="ph ph-warning-circle"></i><h4>Don't skip the bill</h4><p>Unpaid bills ≥¥10,000 → visa denial on re-entry. Always pay before leaving.</p></div>
+            <div class="info-card"><i class="ph ph-ambulance"></i><h4>Ambulances are free</h4><p>0 yen for everyone, including tourists. Source: FDMA</p></div>
+            <div class="info-card"><i class="ph ph-identification-badge"></i><h4>At the hospital</h4><p>Show your passport and insurance card. Emergency transport skips the 7,000-11,000 yen walk-in penalty.</p></div>
+            <div class="info-card"><i class="ph ph-translate"></i><h4>Language support</h4><p>Most ERs have interpreter tablets. Ask for "tsuyaku" (interpreter).</p></div>
+            <div class="info-card"><i class="ph ph-warning-circle"></i><h4>Don't skip the bill</h4><p>Unpaid bills over 10,000 yen = visa denial on re-entry. Always pay before leaving.</p></div>
           </div>
         </div>`,
 
       costEducation: () => `
         <div class="screen screen-info">
-          <div class="screen-header">💰 Your Coverage</div>
+          <div class="screen-header"><i class="ph ph-currency-circle-dollar" style="margin-right:8px;color:var(--primary);"></i>Your Coverage</div>
           <p class="screen-subtitle" id="coverageSubtitle">Based on your insurance: <strong>Not verified yet</strong></p>
           <div class="info-grid" id="costCards">
-            <div class="info-card cost-card"><i class="ph ph-ambulance"></i><h4>Ambulance</h4><p>¥0 — always free</p><p class="cost-status" style="color:#137333;">✅ Free for everyone</p></div>
-            <div class="info-card cost-card"><i class="ph ph-hospital"></i><h4>Clinic Visit</h4><p class="cost-amount">¥5,000–¥15,000</p><p class="cost-status" id="csClinic">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-currency-circle-dollar"></i><h4>ER Visit</h4><p class="cost-amount">¥36,000–¥59,000</p><p class="cost-status" id="csER">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-warning-circle"></i><h4>Walk-in Penalty</h4><p class="cost-amount">¥7,000–¥11,000</p><p class="cost-status" id="csPenalty">—</p></div>
-            <div class="info-card cost-card"><i class="ph ph-pill"></i><h4>Prescriptions</h4><p class="cost-amount">¥1,000–¥5,000</p><p class="cost-status" id="csRx">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-ambulance"></i><h4>Ambulance</h4><p>0 yen — always free</p><p class="cost-status" style="color:var(--success);"><i class="ph ph-check-circle" style="font-size:10px;margin-right:3px;"></i>Free for everyone</p></div>
+            <div class="info-card cost-card"><i class="ph ph-hospital"></i><h4>Clinic Visit</h4><p class="cost-amount">5,000-15,000 yen</p><p class="cost-status" id="csClinic">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-currency-circle-dollar"></i><h4>ER Visit</h4><p class="cost-amount">36,000-59,000 yen</p><p class="cost-status" id="csER">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-warning-circle"></i><h4>Walk-in Penalty</h4><p class="cost-amount">7,000-11,000 yen</p><p class="cost-status" id="csPenalty">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-pill"></i><h4>Prescriptions</h4><p class="cost-amount">1,000-5,000 yen</p><p class="cost-status" id="csRx">—</p></div>
           </div>
-          <button class="btn-primary" style="margin-top:8px;" id="btnAddInsurance"><i class="ph ph-shield-check"></i> Add Insurance Details</button>
-          <button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Continue</button>
-          <button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+          <button class="btn-primary" style="margin-top:10px;" id="btnAddInsurance"><i class="ph ph-shield-check"></i> Add Insurance Details</button>
+          <button class="btn-secondary" style="margin-top:6px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Continue</button>
+          <button class="btn-secondary" style="margin-top:6px;" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       insuranceInput: (ctx) => `
-        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div class="screen-header">🛡️ Travel Insurance</div>
+        <div class="screen screen-form">
+          <div class="screen-header"><i class="ph ph-shield-check" style="margin-right:8px;color:var(--primary);"></i>Travel Insurance</div>
           <p class="screen-subtitle">Tell us your insurance so we can predict your costs</p>
           <div class="ins-form">
             <div class="ins-field">
@@ -1010,7 +1172,7 @@
                 <option value="nomads">World Nomads</option>
                 <option value="axa">AXA Travel</option>
                 <option value="other">Other provider</option>
-                <option value="none">❌ I don't have insurance</option>
+                <option value="none"><i class="ph ph-x-circle"></i> I don't have insurance</option>
               </select>
             </div>
             <div class="ins-field" id="policyField" style="display:none;">
@@ -1099,7 +1261,7 @@
             </div>
           </div>
           <div class="script-card">
-            <div class="script-lang-label">🇯🇵 Japanese — show this or read aloud</div>
+            <div class="script-lang-label">JP Japanese — show this or read aloud</div>
             <p class="script-text-jp">こんにちは。${jpSymptoms}${duration}外国人です。日本語は話せません。診察をお願いします。</p>
             <div class="script-toggle" id="romajiToggle"><i class="ph ph-eye"></i> Show Romaji</div>
             <p class="script-text-romaji" id="romajiText" style="display:none;">Konnichiwa. ${jpSymptoms.replace(/[。]/g,'. ')}${duration}Gaikokujin desu. Nihongo wa hanasemasen. Shinsatsu wo onegai shimasu.</p>
@@ -1116,11 +1278,11 @@
 
       arrival: (ctx) => {
         const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "the hospital" };
-        return `<div class="screen screen-transition"><div class="transition-icon">🏥</div><h2>You've arrived at ${clinic.name}</h2><p>The receptionist hands you a 問診票 (medical questionnaire).<br>MediRoute has pre-filled it for you.</p></div>`;
+        return `<div class="screen screen-transition"><div style="padding:24px 0 8px;"><i class="ph ph-hospital" style="font-size:48px;color:var(--primary);"></i></div><h2>You've arrived at ${clinic.name}</h2><p>The receptionist hands you a medical questionnaire.<br>MediRoute has pre-filled it for you.</p></div>`;
       },
 
       bookingConfirmed: (ctx) => {
-        const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "Tokyo Midtown Medical", phone: "03-5413-0080", distance: "2.1km", hours: "9:00-21:00", language: "🇬🇧 English available", specialty: "Internal Medicine" };
+        const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "Tokyo Midtown Medical", phone: "03-5413-0080", distance: "2.1km", hours: "9:00-21:00", language: "EN English available", specialty: "Internal Medicine" };
         return `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
           <div style="text-align:center;padding:8px 0;">
@@ -1178,9 +1340,9 @@
         });
         return `
         <div class="screen screen-form" id="intakeScreen">
-          <div class="screen-header">📋 問診票 — Medical Questionnaire</div>
+          <div class="screen-header"><i class="ph ph-clipboard-text" style="margin-right:8px;"></i>Medical Questionnaire</div>
           <div class="intake-actions">
-            <button class="btn-scan" id="btnScanForm"><i class="ph ph-camera"></i> 📸 Snap & Translate Form</button>
+            <button class="btn-scan" id="btnScanForm"><i class="ph ph-camera"></i> Snap & Translate Form</button>
           </div>
           <div class="intake-form-card" id="intakeFormCard">
             <div class="intake-row intake-row-header"><div class="intake-col-jp">日本語</div><div class="intake-col-en">English</div></div>
@@ -1194,18 +1356,18 @@
           <div class="scan-overlay" id="scanOverlay" style="display:none;">
             <div class="scan-viewfinder">
               <div class="scan-corners"></div>
-              <p class="scan-text" id="scanText">📸 Point camera at the Japanese form...</p>
+              <p class="scan-text" id="scanText"><i class="ph ph-camera" style="margin-right:6px;"></i>Point camera at the Japanese form...</p>
             </div>
           </div>
-          <button class="btn-primary" onclick="showToast('✅ PDF saved — show at reception')"><i class="ph ph-file-pdf"></i> Download PDF</button>
+          <button class="btn-primary" onclick="showToast('PDF saved — show at reception')"><i class="ph ph-file-pdf"></i> Download PDF</button>
           <button class="btn-primary" id="btnStartTranslate" style="background:var(--surface);color:var(--primary);border:1px solid var(--primary);margin-top:4px;"><i class="ph ph-translate"></i> Start Live Translation with Doctor</button>
-          <p class="form-tip">💡 Hand the Japanese column to the doctor. Then use live translate to communicate.</p>
+          <p class="form-tip"><i class="ph ph-lightbulb" style="margin-right:6px;"></i>Hand the Japanese column to the doctor. Then use live translate to communicate.</p>
         </div>`;
       },
 
       prescriptionTransition: (ctx) => `
         <div class="screen screen-transition">
-          <div class="transition-icon">💊</div>
+          <i class="ph ph-pill" style="font-size:48px;color:var(--primary);margin-bottom:16px;"></i>
           <h2>The doctor prescribed ${ctx.newPrescription||'medication'}</h2>
           <p>Snap a photo of your prescription and we'll send it to a nearby pharmacy for pickup.</p>
         </div>`,
@@ -1214,12 +1376,12 @@
         const drug = ctx.newPrescription || 'Ciprofloxacin';
         return `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div class="screen-header">📸 Upload Prescription</div>
+          <div class="screen-header"><i class="ph ph-camera" style="margin-right:8px;"></i>Upload Prescription</div>
           <p class="screen-subtitle">Snap a photo of the prescription from your doctor</p>
           <div class="rx-camera" id="rxCamera">
             <div class="rx-viewfinder">
               <div class="rx-corners"></div>
-              <p class="rx-hint">📄 Position prescription in frame</p>
+              <p class="rx-hint"><i class="ph ph-file-text" style="margin-right:6px;"></i>Position prescription in frame</p>
             </div>
           </div>
           <button class="btn-primary" id="btnSnapRx"><i class="ph ph-camera"></i> Capture Prescription</button>
@@ -1238,18 +1400,18 @@
 
       pharmacyMatch: (ctx) => {
         const drug = ctx.newPrescription || 'Ciprofloxacin';
-        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: '🇬🇧 Some English' };
+        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: 'EN Some English' };
         return `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div class="screen-header">🔍 Finding Pharmacy...</div>
+          <div class="screen-header"><i class="ph ph-magnifying-glass" style="margin-right:8px;"></i>Finding Pharmacy...</div>
           <div class="pharmacy-progress" id="pharmacyProgress">
-            <div class="pharmacy-step active" id="ps1">📤 Sending prescription...</div>
-            <div class="pharmacy-step" id="ps2">🔍 Checking stock at nearby pharmacies...</div>
-            <div class="pharmacy-step" id="ps3">✅ Pharmacy confirmed!</div>
+            <div class="pharmacy-step active" id="ps1"><i class="ph ph-paper-plane-tilt" style="margin-right:6px;"></i>Sending prescription...</div>
+            <div class="pharmacy-step" id="ps2"><div class="skeleton skeleton-text" style="margin:4px 0;"></div></div>
+            <div class="pharmacy-step" id="ps3"><div class="skeleton skeleton-card" style="margin:4px 0;"></div></div>
           </div>
           <div class="pharmacy-result" id="pharmacyResult" style="display:none;">
             <div style="text-align:center;padding:8px;">
-              <div style="font-size:28px;margin-bottom:4px;">✅</div>
+              <div style="padding:12px;background:var(--success-subtle);border-radius:var(--radius-md);display:inline-block;margin-bottom:14px;border:1px solid var(--success);"><i class="ph ph-check-circle" style="font-size:28px;color:var(--success);"></i></div>
               <div class="screen-header">Pharmacy Matched</div>
               <p class="screen-subtitle">${drug} is in stock</p>
             </div>
@@ -1272,7 +1434,7 @@
 
       pickupReady: (ctx) => {
         const drug = ctx.newPrescription || 'Ciprofloxacin';
-        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: '🇬🇧 Some English' };
+        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: 'EN Some English' };
         const pickupCode = 'RX' + Math.random().toString(36).substring(2,6).toUpperCase();
         return `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
@@ -1301,7 +1463,7 @@
           <button class="btn-primary" onclick="showToast('🗺️ Opening Google Maps...')"><i class="ph ph-map-pin"></i> Get Directions</button>
           <div class="booking-tips">
             <p><strong>📋 What to bring:</strong> Passport, prescription (if you have it), payment</p>
-            <p><strong>🇯🇵 At the counter:</strong> Show the pickup code. Say "処方箋を受け取りに来ました" (Shohousen wo uketori ni kimashita)</p>
+            <p><strong>JP At the counter:</strong> Show the pickup code. Say "処方箋を受け取りに来ました" (Shohousen wo uketori ni kimashita)</p>
           </div>
         </div>`;
       },
@@ -1326,7 +1488,7 @@
               <span>Live Translate — Pharmacist</span>
             </div>
             <div class="lt-mic-area">
-              <div class="lt-mic-btn pulsing" onclick="showToast('🎤 Listening...')"><i class="ph ph-microphone"></i></div>
+              <div class="lt-mic-btn pulsing" onclick="showToast('Listening...')"><i class="ph ph-microphone"></i></div>
               <p class="lt-mic-hint">Tap to speak to the pharmacist</p>
             </div>
             <div class="lt-bubbles">
@@ -1375,7 +1537,7 @@
 
       receipt: () => `
         <div class="screen screen-receipt">
-          <div class="screen-header">📸 Receipt Scanner</div>
+          <div class="screen-header">Receipt Scanner</div>
           <div class="receipt-mock"><div class="receipt-paper">
             <div class="receipt-hospital">St. Luke's International Hospital</div><div class="receipt-stamp">㊞</div>
             <div class="receipt-divider">- - - - - - - - - - - - - - - -</div><div class="receipt-date">2026年6月23日</div>
@@ -1424,9 +1586,9 @@
               <div class="claim-field claim-total-field"><span>Total Claimed</span><span>¥16,000 (~$102)</span></div>
             </div>
             <div class="claim-section"><div class="claim-section-title">Attachments</div>
-              <div class="claim-field"><span>📄 Original Receipt (領収書)</span><span>✅ Attached</span></div>
-              <div class="claim-field"><span>📋 Medical Certificate (診断書)</span><span>✅ Attached</span></div>
-              <div class="claim-field"><span>💳 Insurance Card Copy</span><span>✅ Attached</span></div>
+              <div class="claim-field"><span><i class="ph ph-file-text" style="margin-right:4px;"></i>Original Receipt</span><span><i class="ph ph-check-circle" style="font-size:10px;margin-right:3px;"></i>Attached</span></div>
+              <div class="claim-field"><span><i class="ph ph-clipboard-text" style="margin-right:4px;"></i>Medical Certificate</span><span><i class="ph ph-check-circle" style="font-size:10px;margin-right:3px;"></i>Attached</span></div>
+              <div class="claim-field"><span><i class="ph ph-credit-card" style="margin-right:4px;"></i>Insurance Card Copy</span><span><i class="ph ph-check-circle" style="font-size:10px;margin-right:3px;"></i>Attached</span></div>
             </div>
           </div>
           <div class="claim-actions">
@@ -1489,7 +1651,7 @@
           <div class="screen-header">📋 Replacement Prescription</div>
           <p class="screen-subtitle">Show this at the clinic to request a replacement</p>
           <div class="script-card">
-            <div class="script-lang-label">🇯🇵 Japanese — show to the doctor</div>
+            <div class="script-lang-label">JP Japanese — show to the doctor</div>
             <p class="script-text-jp">薬をなくしました。海外から持ってきた薬です。代替の処方箋を書いていただけますか？</p>
             <div class="script-divider"></div>
             <p class="script-text-en">I lost my medication. It was brought from overseas. Could you please write me a replacement prescription?</p>
@@ -1499,27 +1661,28 @@
 
       endMedication: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">💊</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">Medication Check Complete</h2><p style="font-size:13px;color:var(--on-surface-variant);">You now know what's safe to bring and what needs a permit.</p></div>
+          <div style="padding:24px 0;"><i class="ph ph-pill" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">Medication Check Complete</h2><p style="font-size:13px;color:var(--on-surface-variant);">You now know what's safe to bring and what needs a permit.</p></div>
           <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endTranslation: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">🗣️</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You're Ready to Communicate</h2><p style="font-size:13px;color:var(--on-surface-variant);">Use these phrases anytime during your visit. Come back if you need more help.</p></div>
+          <div style="padding:24px 0;"><i class="ph ph-chats" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">You're Ready to Communicate</h2><p style="font-size:13px;color:var(--on-surface-variant);">Use these phrases anytime during your visit. Come back if you need more help.</p></div>
           <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endCost: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
-          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">💰</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You Know Your Costs</h2><p style="font-size:13px;color:var(--on-surface-variant);">Now you can plan your budget. Remember: always keep receipts for claims.</p></div>
+          <div style="padding:24px 0;"><i class="ph ph-currency-circle-dollar" style="font-size:48px;color:var(--primary);"></i><h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.02em;">You Know Your Costs</h2><p style="font-size:13px;color:var(--on-surface-variant);">Now you can plan your budget. Remember: always keep receipts for claims.</p></div>
           <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
         </div>`,
 
       endClinic: () => `
         <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
           <div style="text-align:center;padding:20px 0;">
-            <div style="font-size:48px;">🎉</div>
-            <h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">All done!</h2>
+            <div style="padding:24px 0;">
+            <i class="ph ph-check-circle" style="font-size:48px;color:var(--success);"></i>
+            <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;margin:16px 0;letter-spacing:-0.03em;">All done!</h2>
             <p style="font-size:13px;color:var(--on-surface-variant);">Your visit is complete. Claim submitted, medication picked up.</p>
           </div>
           <div class="info-grid" style="grid-template-columns:1fr;">
@@ -1626,7 +1789,7 @@
           <div class="screen-header">🏛️ Your Embassy</div>
           <p class="screen-subtitle">If you're arrested or need urgent consular assistance</p>
           <div class="info-grid" style="grid-template-columns:1fr;">
-            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>🇺🇸 US Embassy Tokyo</h4><p style="font-size:14px;font-weight:700;margin:4px 0;">📞 03-3224-5000</p><p style="font-size:12px;">American Citizen Services — 24h emergency line</p><p style="font-size:12px;margin-top:4px;color:var(--on-surface-variant);">Tell them: "I need assistance with medication regulations in Japan." They've handled this before.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>US US Embassy Tokyo</h4><p style="font-size:14px;font-weight:700;margin:4px 0;">📞 03-3224-5000</p><p style="font-size:12px;">American Citizen Services — 24h emergency line</p><p style="font-size:12px;margin-top:4px;color:var(--on-surface-variant);">Tell them: "I need assistance with medication regulations in Japan." They've handled this before.</p></div>
           </div>
           <a href="tel:+81332245000" class="btn-primary" style="text-decoration:none;margin-top:12px;"><i class="ph ph-phone-call"></i> Call Embassy</a>
         </div>`,
@@ -1893,33 +2056,56 @@
     // ══════════════════════════════════════════
     function renderHub() {
       const hasHistory = sessionState.pastRoutes.length > 0;
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
       document.getElementById("phoneScreen").innerHTML = `
-        <div class="screen" style="background:var(--surface);padding:24px 16px;gap:16px;min-height:100%;">
-          <div style="text-align:center;">
-            <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--primary);">MediRoute</div>
-            <div style="font-size:12px;color:var(--on-surface-variant);">AI Medical Companion</div>
-          </div>
-          <div class="hub-search"><i class="ph ph-magnifying-glass" style="color:var(--on-surface-variant);"></i><input type="text" id="hubSearch" placeholder="Type a symptom or medication name..."></div>
-          ${CATEGORIES.map(cat => `
-            <div class="hub-category" data-category="${cat.id}" style="border-left:3px solid ${cat.color};">
-              <div class="hub-category-main" id="cat-main-${cat.id}">
-                <div style="flex:1;"><span style="font-size:20px;">${cat.icon}</span><span style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-left:8px;">${cat.label}</span><span style="font-size:11px;color:var(--on-surface-variant);margin-left:6px;">[${cat.count}]</span></div>
-                <span class="hub-expand" id="cat-expand-${cat.id}" style="cursor:pointer;padding:4px 8px;">↗</span>
-              </div>
-              <div class="hub-submenu" id="cat-sub-${cat.id}" style="display:none;">
-                ${cat.routeOrder.map(rk => `<div class="hub-subitem" data-route="${rk}">● ${ROUTES[rk].label}</div>`).join('')}
-              </div>
+        <div class="screen" style="background:var(--surface);padding:20px 18px;gap:0;min-height:100%;">
+          <div class="hub-hero">
+            <div class="hub-hero-text">
+              <div class="hub-hero-greeting">${greeting}</div>
+              <div class="hub-hero-title">MediRoute</div>
+              <div class="hub-hero-sub">AI medical companion for travelers in Japan</div>
             </div>
-          `).join('')}
+            <button class="hub-emergency-cta" onclick="startRoute('chest-pain')" title="Emergency">
+              <i class="ph ph-phone-call"></i> 119
+            </button>
+          </div>
+          <div class="hub-search-app"><i class="ph ph-magnifying-glass"></i><input type="text" id="hubSearch" placeholder="Describe symptoms or name a medication..."></div>
+          <div class="hub-section-title">Quick Access</div>
+          <div class="hub-bento">
+            ${CATEGORIES.slice(0, 4).map(cat => `
+              <div class="hub-bento-card" data-category="${cat.id}" id="bento-${cat.id}">
+                <div class="hub-bento-icon" style="background:${cat.color}15;color:${cat.color};"><i class="${cat.icon}"></i></div>
+                <div class="hub-bento-label">${cat.label}</div>
+                <div class="hub-bento-count">${cat.count} routes available</div>
+                <div class="hub-bento-expand" id="bento-expand-${cat.id}" data-cat="${cat.id}">+</div>
+                <div class="hub-bento-subs" id="bento-subs-${cat.id}">
+                  ${cat.routeOrder.map(rk => `<div class="hub-bento-subitem" data-route="${rk}">${ROUTES[rk].label}</div>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="hub-quick-actions">
+            <div class="hub-quick-btn" data-route="chest-pain"><i class="ph ph-heartbeat" style="color:var(--error);"></i><span>Chest Pain</span></div>
+            <div class="hub-quick-btn" data-route="moderate-fever"><i class="ph ph-thermometer" style="color:var(--warning);"></i><span>Fever</span></div>
+            <div class="hub-quick-btn" data-route="pharmacy-translate"><i class="ph ph-translate" style="color:var(--primary);"></i><span>Translate</span></div>
+            <div class="hub-quick-btn" data-route="pre-travel-check"><i class="ph ph-airplane-takeoff" style="color:var(--primary);"></i><span>Travel Meds</span></div>
+          </div>
           ${hasHistory ? `
-            <div style="border-top:1px solid var(--outline);padding-top:12px;">
-              <div style="font-size:11px;color:var(--on-surface-variant);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Recent Sessions</div>
-              ${sessionState.pastRoutes.slice(-5).reverse().map(p => `
-                <div class="hub-recent" data-route="${p.route}"><span>✓</span><span>${ROUTES[p.route]?.label||p.route}</span><span style="color:var(--on-surface-variant);font-size:10px;margin-left:auto;">${timeAgo(p.timestamp)}</span></div>
+            <div class="hub-recent-section">
+              <div class="hub-section-title">Recent Sessions</div>
+              ${sessionState.pastRoutes.slice(-3).reverse().map(p => `
+                <div class="hub-recent-item" data-route="${p.route}">
+                  <i class="ph ph-clock-counter-clockwise"></i>
+                  <span class="hub-recent-item-label">${ROUTES[p.route]?.label||p.route}</span>
+                  <span class="hub-recent-item-time">${timeAgo(p.timestamp)}</span>
+                </div>
               `).join('')}
             </div>
           ` : ''}
-          <button class="btn-primary" id="hubNewSession" style="background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);">🔄 New Session</button>
+          <div class="hub-footer-action" id="hubNewSession">
+            <i class="ph ph-arrow-counter-clockwise"></i> New Session
+          </div>
         </div>`;
       bindHubEvents();
     }
@@ -1932,46 +2118,69 @@
     }
 
     function bindHubEvents() {
-      document.querySelectorAll('.hub-category-main').forEach(el => {
-        el.addEventListener('click', (e) => {
-          if (e.target.closest('.hub-expand')) return;
-          const catId = el.closest('.hub-category').dataset.category;
+      // Bento card click -> start first route in category
+      document.querySelectorAll('.hub-bento-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.hub-bento-expand') || e.target.closest('.hub-bento-subitem')) return;
+          const catId = card.dataset.category;
           const cat = CATEGORIES.find(c => c.id === catId);
           if (cat) startRoute(cat.routeOrder[0]);
         });
       });
-      document.querySelectorAll('.hub-expand').forEach(el => {
-        el.addEventListener('click', (e) => {
+
+      // Bento expand button -> toggle submenu
+      document.querySelectorAll('.hub-bento-expand').forEach(btn => {
+        btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const catId = el.id.replace('cat-expand-', '');
-          const sub = document.getElementById('cat-sub-' + catId);
-          const isOpen = sub.style.display !== 'none';
-          document.querySelectorAll('.hub-submenu').forEach(s => s.style.display = 'none');
-          document.querySelectorAll('.hub-expand').forEach(e => e.textContent = '↗');
-          if (!isOpen) { sub.style.display = 'block'; el.textContent = '✕'; }
+          const catId = btn.dataset.cat;
+          const subs = document.getElementById('bento-subs-' + catId);
+          const isOpen = subs.classList.contains('open');
+          // Close all others
+          document.querySelectorAll('.hub-bento-subs.open').forEach(s => s.classList.remove('open'));
+          document.querySelectorAll('.hub-bento-expand').forEach(b => b.textContent = '+');
+          if (!isOpen) { subs.classList.add('open'); btn.textContent = '\u2212'; }
         });
       });
-      document.querySelectorAll('.hub-subitem').forEach(el => {
-        el.addEventListener('click', (e) => { e.stopPropagation(); startRoute(el.dataset.route); });
+
+      // Bento subitem click -> start specific route
+      document.querySelectorAll('.hub-bento-subitem').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          startRoute(item.dataset.route);
+        });
       });
-      document.querySelectorAll('.hub-recent').forEach(el => {
-        el.addEventListener('click', () => startRoute(el.dataset.route));
+
+      // Quick action buttons
+      document.querySelectorAll('.hub-quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => startRoute(btn.dataset.route));
       });
+
+      // Recent session items
+      document.querySelectorAll('.hub-recent-item').forEach(item => {
+        item.addEventListener('click', () => startRoute(item.dataset.route));
+      });
+
+      // Search
       const searchInput = document.getElementById('hubSearch');
       if (searchInput) {
         searchInput.addEventListener('input', () => {
           const match = matchKeywordRoute(searchInput.value);
-          document.querySelectorAll('.hub-category').forEach(c => { c.style.opacity = match ? '0.4' : '1'; c.style.transition = 'opacity 200ms'; });
+          document.querySelectorAll('.hub-bento-card').forEach(c => {
+            c.style.opacity = match ? '0.4' : '1';
+            c.style.transition = 'opacity 200ms';
+          });
           if (match) {
             const catId = ROUTES[match].category;
-            const catEl = document.querySelector(`.hub-category[data-category="${catId}"]`);
-            if (catEl) { catEl.style.opacity = '1'; catEl.style.boxShadow = '0 0 0 2px var(--primary)'; }
+            const card = document.getElementById('bento-' + catId);
+            if (card) { card.style.opacity = '1'; card.style.boxShadow = '0 0 0 2px var(--primary)'; }
           }
         });
         searchInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { const match = matchKeywordRoute(searchInput.value); if (match) startRoute(match); }
         });
       }
+
+      // New session
       const newBtn = document.getElementById('hubNewSession');
       if (newBtn) newBtn.addEventListener('click', () => { clearState(); renderHub(); });
     }
@@ -2070,8 +2279,8 @@
           const ps2 = document.getElementById('ps2');
           const ps3 = document.getElementById('ps3');
           const result = document.getElementById('pharmacyResult');
-          if (ps2) setTimeout(() => ps2.classList.add('active'), 1000);
-          if (ps3) setTimeout(() => ps3.classList.add('active'), 2000);
+          if (ps2) setTimeout(() => { ps2.classList.add('active'); ps2.innerHTML = '<i class="ph ph-magnifying-glass" style="margin-right:6px;"></i>Checking stock at nearby pharmacies...'; }, 1000);
+          if (ps3) setTimeout(() => { ps3.classList.add('active'); ps3.innerHTML = '<i class="ph ph-check-circle" style="margin-right:6px;"></i>Pharmacy confirmed!'; }, 2000);
           if (result) setTimeout(() => { result.style.display = 'block'; }, 2500);
         }, 500);
         // Bind confirm button after delay
@@ -2346,7 +2555,7 @@
     function updateTopBar() {
       const logo = document.querySelector('.logo');
       if (sessionState.currentRoute) {
-        logo.innerHTML = '<span style="cursor:pointer;" id="hubHomeBtn">🏠</span> MediRoute';
+        logo.innerHTML = '<span style="cursor:pointer;" id="hubHomeBtn"><i class="ph ph-house" style="font-size:18px;"></i></span> MediRoute';
       } else {
         logo.textContent = 'MediRoute';
       }
@@ -2485,7 +2694,7 @@
       if (hasSaved && sessionState.currentRoute) {
         document.getElementById("phoneScreen").innerHTML = `
           <div class="screen screen-transition">
-            <div class="transition-icon">📱</div>
+            <div style="padding:24px 0 8px;"><i class="ph ph-clock-counter-clockwise" style="font-size:48px;color:var(--primary);"></i></div>
             <h2>Continue where you left off?</h2>
             <p style="font-size:13px;color:var(--on-surface-variant);">${ROUTES[sessionState.currentRoute]?.label||'Previous session'} — Step ${sessionState.currentStep+1}/${totalSteps()}</p>
             <div style="display:flex;gap:12px;margin-top:16px;">
