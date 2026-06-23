@@ -54,12 +54,6 @@
     .top-bar-left { display: flex; align-items: center; gap: 12px; }
     .logo { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--primary); letter-spacing: -0.02em; }
     .top-bar-right { display: flex; align-items: center; gap: 16px; }
-    .lang-toggle, .tech-toggle {
-      background: none; border: 1px solid var(--outline); border-radius: var(--radius-sm);
-      padding: 4px 10px; font-size: 13px; cursor: pointer; font-family: var(--font-body);
-      color: var(--on-surface-variant); transition: background var(--transition-fast);
-    }
-    .lang-toggle:hover, .tech-toggle:hover { background: var(--surface-variant); }
     .step-indicator { font-size: 13px; color: var(--on-surface-variant); font-family: var(--font-mono); }
 
     /* ── Main Content ── */
@@ -644,7 +638,6 @@
       .phone-notch { display: none; }
       .phone-screen { padding-top: 0; }
       .tech-sidebar { display: none !important; }
-      .tech-toggle { display: none; }
       .nav-bar { padding: 0 12px; height: 64px; gap: 12px; }
       .nav-btn { padding: 8px 14px; font-size: 13px; }
       .info-grid { grid-template-columns: 1fr; }
@@ -665,8 +658,6 @@
   <header class="top-bar">
     <div class="top-bar-left"><span class="logo">MediRoute</span></div>
     <div class="top-bar-right">
-      <button class="lang-toggle" id="langToggle">🌐 EN</button>
-      <button class="tech-toggle" id="techToggle">&lt;/&gt;</button>
       <span class="step-indicator" id="stepIndicator"></span>
     </div>
   </header>
@@ -2811,16 +2802,6 @@
           const idx = parseInt(e.key) - 1;
           if (CATEGORIES[idx]) startRoute(CATEGORIES[idx].routeOrder[0]);
         }
-      });
-      document.getElementById('langToggle').addEventListener('click', () => {
-        sessionState.lang = sessionState.lang === 'en' ? 'jp' : 'en';
-        document.getElementById('langToggle').textContent = sessionState.lang === 'en' ? '🌐 EN' : '🌐 JP';
-        updateNavButtons();
-        updateStepIndicator();
-        saveState();
-      });
-      document.getElementById('techToggle').addEventListener('click', () => {
-        document.getElementById('techSidebar').classList.toggle('visible');
       });
       document.getElementById('sidebarClose').addEventListener('click', () => {
         document.getElementById('techSidebar').classList.remove('visible');

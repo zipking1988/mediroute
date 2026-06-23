@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "^0.79.10",
     "@earendil-works/pi-ai": "^0.79.10",
+    "@earendil-works/pi-coding-agent": "^0.79.10",
+    "@playwright/test": "^1.61.0",
     "typebox": "latest"
   },
   "devDependencies": {
