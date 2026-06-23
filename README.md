@@ -2,7 +2,7 @@
 
 A **Google/Gemini hackathon project** that helps international tourists navigate Japan's healthcare system — from symptom triage to pharmacy pickup, with live translation at every step.
 
-> **Live Demo:** Open [`mediroute-mock.html`](mediroute-mock.html) in any browser — 15 interactive paths, no server needed.
+> **Live Demo:** [agent-pipeline-ten.vercel.app](https://agent-pipeline-ten.vercel.app) or open [`index.html`](index.html) in any browser — 15 interactive paths, no server needed.
 
 ---
 
@@ -22,7 +22,7 @@ MediRoute guides tourists through 5 medical scenarios:
 
 ```
 .
-├── mediroute-mock.html      # 🎮 Interactive 15-path phone prototype (open in browser)
+├── index.html               # 🎮 Interactive 15-path phone prototype (open in browser)
 ├── plan.ts                  # 🔄 3-agent hackathon planning pipeline
 ├── ask.ts                   # 💬 Single-agent Q&A CLI
 ├── pi-factcheck.ts          # ✅ Multi-agent fact-check pipeline (Researcher → Checker → Synthesizer)
@@ -43,7 +43,7 @@ MediRoute guides tourists through 5 medical scenarios:
 
 ### Interactive Mock (no install needed)
 ```bash
-open mediroute-mock.html
+open index.html
 ```
 **Keyboard shortcuts:** `1`-`5` jump categories, `←` `→` navigate, `H` return to hub.
 
@@ -94,7 +94,7 @@ This project was built for a **Google/Gemini hackathon**. The planning pipeline 
 2. **Tech Architect** recommends specific Gemini APIs, Firebase, Vertex AI integrations
 3. **Pitch Coach** produces demo flow scripts, pitch deck outlines, and judge Q&A prep
 
-The interactive mock (`mediroute-mock.html`) demonstrates the complete 15-path user experience as a clickable prototype suitable for demos.
+The interactive mock (`index.html`) demonstrates the complete 15-path user experience as a clickable prototype suitable for demos.
 
 ---
 

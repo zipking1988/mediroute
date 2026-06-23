@@ -26,7 +26,7 @@ Each agent is a **separate mental mode** with its own system prompt. I search th
 
 ## Interactive Mock — v4 (M3 Google Redesign)
 
-**File:** [`mediroute-mock.html`](mediroute-mock.html) — single-file, open in any browser. 0 dependencies, no build step.
+**File:** [`index.html`](index.html) — single-file, open in any browser. 0 dependencies, no build step.
 
 A clickable 15-path prototype simulating MediRoute's full product flow. Modern app-style home screen with **bento grid**, time-based greeting, quick actions, skeleton loading states, and prominent emergency CTA.
 
@@ -43,7 +43,7 @@ A clickable 15-path prototype simulating MediRoute's full product flow. Modern a
 ### Quick start
 
 ```bash
-open mediroute-mock.html
+open index.html
 ```
 
 ### Hub home screen
@@ -132,7 +132,7 @@ Coverage Cards → Insurance Input (provider + policy + coverage type) → Insur
 
 | File | What |
 |------|------|
-| [`mediroute-mock.html`](mediroute-mock.html) | **Interactive mock v4** — 15-path phone frame, M3 Google redesign, bento hub, Phosphor icons |
+| [`index.html`](index.html) | **Interactive mock v4** — 15-path phone frame, M3 Google redesign, bento hub, Phosphor icons |
 | [`docs/hackathon-master.md`](docs/hackathon-master.md) | Hackathon master doc — all 5 verified docs consolidated |
 | [`docs/product-spec.md`](docs/product-spec.md) | Full MediRoute product spec (8 modules) |
 | [`docs/tech-plan.md`](docs/tech-plan.md) | Generated tech plan + stack recommendations |
@@ -154,4 +154,4 @@ Coverage Cards → Insurance Input (provider + policy + coverage type) → Insur
 - **Model**: DeepSeek (deepseek-v4-pro) via pi
 - **Web search**: agent-reach (Exa semantic search + Jina Reader)
 - **Session**: Isolated per agent — no context pollution
-- **Mock**: Open `mediroute-mock.html` in browser — no server needed
+- **Mock**: Open `index.html` in browser — no server needed
