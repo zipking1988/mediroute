@@ -31,13 +31,14 @@ Each agent is a **separate mental mode** with its own system prompt. I search th
 A clickable 15-path prototype simulating MediRoute's full product flow. Modern app-style home screen with **bento grid**, time-based greeting, quick actions, skeleton loading states, and prominent emergency CTA.
 
 **Design system:**
-- **Typography:** Roboto Flex (display + body) + JetBrains Mono (code) — Google-native, no display face
-- **Palette:** Google Blue accent (#1A73E8), Material error (#EA4335) / warning (#FBBC04) for severity
-- **Icons:** Phosphor exclusively — 166 usages in templates
-- **Surfaces:** Solid M3 surface (#FFFBFE), clean backgrounds — no glass blur, no grain texture
-- **Shadows:** Neutral tinted (not teal), M3 elevation levels (0/1/2/3)
-- **Motion:** M3 standard easing (cubic-bezier 0.2,0,0,1.0), 250-300ms transitions, tactile :active scale(0.98)
-- **Layout:** Left-aligned headers, asymmetric bento grid (VARIANCE=8), airy spacing (DENSITY=4)
+- **Typography:** Roboto Flex (display + body) + JetBrains Mono (code) — Google-native
+- **Palette:** Google Blue (#1A73E8), Material error (#EA4335) / warning (#FBBC04), tokenized CSS variables
+- **Icons:** Phosphor exclusively — 210+ usages
+- **Surfaces:** M3 surface (#FFFBFE) with subtle 0.012 opacity grain, no glass blur
+- **Buttons:** All `btn-primary` (filled blue, icon+label, :active press) — single consistent style
+- **Shadows:** Neutral tinted M3 elevation levels (0/1/2/3)
+- **Motion:** M3 easing (cubic-bezier 0.2,0,0,1.0), 250-300ms transitions
+- **Layout:** Left-aligned headers, asymmetric bento grid + 2×2 mini grid, airy spacing
 
 ### Quick start
 
@@ -51,7 +52,7 @@ open mediroute-mock.html
 - **Emergency CTA** — red "119" button top-right, one-tap to chest pain triage
 - **Bento grid** — 4 category cards (Emergency/Clinic/Medication/Translation) in 2x2 layout
 - **Expand buttons** — `+` on any card reveals sub-routes inline
-- **Quick actions** — Chest Pain, Fever, Translate, Travel Meds — one-tap shortcuts
+- **Quick access** — 2×2 mini grid (My Info / Insurance / Guide / Q&A) with elevated cards
 - **Search bar** — pill-style input, highlights matching category card on type
 - **Recent sessions** — last 3 with timestamps, tap to resume
 
