@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediRoute — AI Medical Companion</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1A73E8; --primary-hover: #1557B0;
+      --error: #EA4335; --warning: #FBBC04;
+      --surface: #FFFFFF; --surface-variant: #F8F9FA;
+      --on-surface: #202124; --on-surface-variant: #5F6368;
+      --outline: #DADCE0;
+      --font-display: 'DM Sans', sans-serif;
+      --font-body: 'Roboto', sans-serif;
+      --font-mono: 'Roboto Mono', monospace;
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-elevated: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+      --transition-fast: 150ms ease; --transition-normal: 250ms ease;
+    }
+    body {
+      font-family: var(--font-body); color: var(--on-surface);
+      background: #F1F3F4; min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top Bar ── */
+    .top-bar {
+      width: 100%; height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--outline);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--primary); letter-spacing: -0.02em; }
+    .top-bar-right { display: flex; align-items: center; gap: 16px; }
+    .lang-toggle, .tech-toggle {
+      background: none; border: 1px solid var(--outline); border-radius: var(--radius-sm);
+      padding: 4px 10px; font-size: 13px; cursor: pointer; font-family: var(--font-body);
+      color: var(--on-surface-variant); transition: background var(--transition-fast);
+    }
+    .lang-toggle:hover, .tech-toggle:hover { background: var(--surface-variant); }
+    .step-indicator { font-size: 13px; color: var(--on-surface-variant); font-family: var(--font-mono); }
+
+    /* ── Main Content ── */
+    .main-content {
+      flex: 1; display: flex; align-items: flex-start; justify-content: center;
+      gap: 32px; padding: 32px 24px; max-width: 1100px; width: 100%;
+    }
+    .phone-wrapper { flex-shrink: 0; }
+    .phone-frame {
+      width: 390px; height: 700px; border-radius: 48px;
+      border: 8px solid #1a1a1c; background: var(--surface);
+      box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.25);
+      position: relative; overflow: hidden;
+    }
+    .phone-notch {
+      width: 120px; height: 30px; background: #1a1a1c;
+      border-radius: 0 0 20px 20px; position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%); z-index: 10;
+    }
+    .phone-screen {
+      width: 100%; height: 100%; overflow-y: auto;
+      padding-top: 40px; background: var(--surface-variant); position: relative;
+    }
+    .tech-sidebar {
+      width: 280px; flex-shrink: 0; background: var(--surface);
+      border-radius: var(--radius-lg); border: 1px solid var(--outline);
+      padding: 20px; box-shadow: var(--shadow-card);
+      display: none; max-height: 700px; overflow-y: auto;
+    }
+    .tech-sidebar.visible { display: block; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .sidebar-header h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+    .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--on-surface-variant); }
+    .sidebar-body { font-size: 13px; line-height: 1.6; }
+    .sidebar-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--outline); }
+    .sidebar-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .sidebar-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 4px; }
+    .sidebar-item p { font-size: 13px; line-height: 1.5; color: var(--on-surface-variant); }
+    .sidebar-item code { display: block; background: var(--surface-variant); padding: 6px 8px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 11px; margin-top: 4px; word-break: break-all; }
+    .sidebar-empty { font-size: 13px; color: var(--on-surface-variant); font-style: italic; text-align: center; padding: 24px 0; }
+
+    /* ── Navigation Bar ── */
+    .nav-bar {
+      width: 100%; height: 72px; display: flex; align-items: center; justify-content: center;
+      gap: 24px; padding: 0 24px; background: var(--surface);
+      border-top: 1px solid var(--outline); position: sticky; bottom: 0; z-index: 100;
+    }
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px; padding: 10px 20px;
+      background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 14px; font-weight: 500; color: var(--on-surface);
+      cursor: pointer; transition: all var(--transition-fast);
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--surface-variant); border-color: var(--primary); }
+    .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .nav-btn .ph { font-size: 16px; }
+    .progress-dots { display: flex; gap: 8px; align-items: center; }
+    .progress-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--outline); cursor: pointer; transition: all var(--transition-fast); }
+    .progress-dot.visited { background: var(--primary); opacity: 0.5; }
+    .progress-dot.current { background: var(--primary); opacity: 1; transform: scale(1.3); }
+    .progress-dot:not(.visited):not(.current) { cursor: default; }
+
+    /* ── Transitions ── */
+    .screen-exit { opacity: 0; transform: translateY(-10px); transition: opacity 150ms ease, transform 150ms ease; }
+    .screen-enter { opacity: 0; transform: translateY(10px); animation: screenEnter 150ms ease forwards; }
+    @keyframes screenEnter { to { opacity: 1; transform: translateY(0); } }
+    .toast {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: var(--on-surface); color: white; padding: 8px 16px; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 500; opacity: 0; transition: all 300ms ease; z-index: 50; white-space: nowrap;
+    }
+    .toast-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Screen Base ── */
+    .screen { padding: 16px; min-height: 100%; display: flex; flex-direction: column; }
+
+    /* ── Chat ── */
+    .screen-chat { background: var(--surface); padding-bottom: 0; height: 100%; }
+    .chat-header { padding: 12px 16px; font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--primary); border-bottom: 1px solid var(--outline); text-align: center; background: var(--surface); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-bubble { max-width: 85%; padding: 12px 14px; border-radius: var(--radius-lg); font-size: 14px; line-height: 1.5; }
+    .chat-bubble-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: var(--radius-sm); }
+    .chat-bubble-assistant { align-self: flex-start; background: var(--surface); color: var(--on-surface); border: 1px solid var(--outline); border-bottom-left-radius: var(--radius-sm); }
+    .chat-time { display: block; font-size: 11px; opacity: 0.7; margin-top: 4px; }
+    .typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+    .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--on-surface-variant); animation: typingBounce 1.4s infinite ease-in-out; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4;} 30%{transform:translateY(-4px);opacity:1;} }
+    .chat-input-bar { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--outline); background: var(--surface); }
+    .chat-input-bar input { flex: 1; padding: 10px 14px; border: 1px solid var(--outline); border-radius: 20px; font-family: var(--font-body); font-size: 14px; outline: none; background: var(--surface-variant); }
+    .chat-input-bar button { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* ── Triage ── */
+    .screen-triage { padding: 16px; background: var(--surface); min-height: 100%; gap: 12px; }
+    .severity-card { background: white; border: 2px solid var(--error); border-radius: var(--radius-lg); padding: 20px; text-align: center; }
+    .severity-badge { display: inline-block; background: var(--error); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .severity-card h2 { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--error); margin-bottom: 8px; }
+    .severity-reasoning { font-size: 13px; color: var(--on-surface-variant); margin-bottom: 12px; line-height: 1.5; }
+    .route-label { display: inline-block; background: #FCE8E6; color: var(--error); padding: 4px 12px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+    .btn-119 { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; background: var(--error); color: white; border: none; border-radius: var(--radius-md); font-family: var(--font-display); font-size: 18px; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
+    .btn-119.pulsing { animation: pulseGlow 2s ease-in-out infinite; }
+    @keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(234,67,53,0.4);} 50%{box-shadow:0 0 0 12px rgba(234,67,53,0);} }
+    .cost-reassurance { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #E6F4EA; border-radius: var(--radius-sm); font-size: 12px; color: #137333; text-align: left; }
+
+    /* ── Info Grid ── */
+    .screen-info { padding: 16px; background: var(--surface); gap: 16px; min-height: 100%; }
+    .screen-header { font-family: var(--font-display); font-size: 18px; font-weight: 700; text-align: center; }
+    .screen-subtitle { font-size: 13px; color: var(--on-surface-variant); text-align: center; line-height: 1.5; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .info-card { background: var(--surface-variant); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--outline); }
+    .info-card .ph { font-size: 22px; color: var(--primary); margin-bottom: 6px; }
+    .info-card h4 { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .info-card p { font-size: 11px; color: var(--on-surface-variant); line-height: 1.4; }
+
+    /* ── Clinic Search ── */
+    .screen-clinics { padding: 16px; background: var(--surface); gap: 12px; min-height: 100%; }
+    .map-mock { width: 100%; height: 100px; border-radius: var(--radius-md); background: linear-gradient(135deg,#E8F0FE,#D2E3FC,#E8F0FE); position: relative; overflow: hidden; }
+    .map-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(26,115,232,0.08) 1px,transparent 1px),linear-gradient(90deg,rgba(26,115,232,0.08) 1px,transparent 1px); background-size: 30px 30px; }
+    .map-pin { position: absolute; top: 35px; left: 50%; width: 14px; height: 14px; background: var(--error); border-radius: 50% 50% 50% 0; transform: translateX(-50%) rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .map-label { position: absolute; bottom: 8px; right: 10px; font-size: 10px; color: var(--on-surface-variant); background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: var(--radius-sm); }
+    .clinic-list { display: flex; flex-direction: column; gap: 8px; }
+    .clinic-card { background: var(--surface-variant); border: 1px solid var(--outline); border-radius: var(--radius-md); padding: 12px; transition: border-color var(--transition-fast); cursor: pointer; }
+    .clinic-card.selected { border-width: 2px; }
+    .clinic-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .clinic-card-top h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-right: 4px; }
+    .badge-emergency { background: #FCE8E6; color: var(--error); }
+    .badge-internal { background: #E8F0FE; color: var(--primary); }
+    .badge-lang { background: #E6F4EA; color: #137333; }
+    .clinic-meta { display: flex; gap: 12px; font-size: 12px; color: var(--on-surface-variant); }
+    .clinic-meta .ph { font-size: 12px; margin-right: 2px; }
+    .btn-select { padding: 6px 14px; background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: all var(--transition-fast); }
+    .btn-select:hover { border-color: var(--primary); color: var(--primary); }
+    .citation { font-size: 10px; color: var(--on-surface-variant); text-align: center; padding: 4px; border-top: 1px solid var(--outline); }
+
+    /* ── Booking Script ── */
+    .screen-script { padding: 16px; background: var(--surface); gap: 12px; min-height: 100%; }
+    .phone-call-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--surface-variant); border-radius: var(--radius-md); border: 1px solid var(--outline); }
+    .phone-number { font-family: var(--font-mono); font-size: 14px; font-weight: 500; }
+    .btn-call { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .script-card { background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-card); }
+    .script-lang-label { font-size: 12px; color: var(--on-surface-variant); margin-bottom: 8px; font-weight: 500; }
+    .script-text-jp { font-size: 16px; line-height: 1.7; font-weight: 500; margin-bottom: 8px; }
+    .script-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--primary); cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); margin-bottom: 8px; transition: background var(--transition-fast); }
+    .script-toggle:hover { background: #E8F0FE; }
+    .script-text-romaji { font-size: 13px; color: var(--on-surface-variant); font-style: italic; margin-bottom: 8px; line-height: 1.5; }
+    .script-divider { height: 1px; background: var(--outline); margin: 10px 0; }
+    .script-text-en { font-size: 13px; color: var(--on-surface-variant); line-height: 1.5; }
+    .script-tip { font-size: 11px; color: var(--on-surface-variant); text-align: center; padding: 8px; background: #FFF8E1; border-radius: var(--radius-sm); }
+
+    /* ── Intake Form ── */
+    .screen-form { padding: 16px; background: var(--surface); gap: 12px; min-height: 100%; }
+    .intake-form-card { border: 1px solid var(--outline); border-radius: var(--radius-lg); overflow: hidden; }
+    .intake-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid var(--outline); }
+    .intake-row:last-child { border-bottom: none; }
+    .intake-row-header { background: var(--surface-variant); font-size: 11px; font-weight: 700; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em; }
+    .intake-col-jp, .intake-col-en { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .intake-col-jp { border-right: 1px solid var(--outline); }
+    .field-label { font-size: 10px; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.03em; }
+    .field-value { font-size: 13px; font-weight: 500; }
+    .intake-col-jp .field-value { font-size: 14px; }
+    .btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: background var(--transition-fast); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .form-tip { font-size: 11px; color: var(--on-surface-variant); text-align: center; padding: 8px; background: #FFF8E1; border-radius: var(--radius-sm); }
+
+    /* ── Transition ── */
+    .screen-transition { justify-content: center; align-items: center; text-align: center; background: var(--surface); padding: 32px; gap: 16px; min-height: 100%; }
+    .transition-icon { font-size: 56px; }
+    .screen-transition h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; line-height: 1.4; }
+    .screen-transition p { font-size: 13px; color: var(--on-surface-variant); line-height: 1.6; }
+
+    /* ── Drug Interaction ── */
+    .screen-interaction { padding: 16px; background: var(--surface); gap: 12px; min-height: 100%; }
+    .interaction-card { border: 2px solid var(--warning); border-radius: var(--radius-lg); padding: 20px; background: #FFFBF0; }
+    .interaction-card.interaction-critical { border-color: var(--error); background: #FFF5F5; }
+    .interaction-header { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; margin-bottom: 12px; }
+    .interaction-card.interaction-critical .interaction-header { color: var(--error); }
+    .interaction-card h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .interaction-summary { font-size: 14px; font-weight: 500; color: var(--error); margin-bottom: 12px; }
+    .severity-bar { width: 100%; height: 6px; background: var(--outline); border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
+    .severity-fill { height: 100%; border-radius: 3px; }
+    .severity-fill.critical { background: var(--error); }
+    .interaction-detail { font-size: 13px; color: var(--on-surface-variant); margin-bottom: 16px; line-height: 1.5; }
+    .suggested-question { background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-md); padding: 12px; margin-bottom: 12px; }
+    .suggested-question h4 { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--on-surface-variant); }
+    .question-en { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .question-jp { font-size: 13px; color: var(--on-surface-variant); }
+    .disclaimer { font-size: 10px; color: var(--on-surface-variant); text-align: center; font-style: italic; }
+
+    /* ── Receipt ── */
+    .screen-receipt { padding: 16px; background: var(--surface); gap: 12px; min-height: 100%; }
+    .receipt-mock { background: #fafaf5; border: 1px solid #e0dcd0; border-radius: var(--radius-md); overflow: hidden; }
+    .receipt-paper { padding: 20px 16px; background: linear-gradient(to bottom,#fafaf5,#f5f2ea); }
+    .receipt-hospital { text-align: center; font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #333; margin-bottom: 12px; letter-spacing: 0.02em; }
+    .receipt-stamp { text-align: center; font-size: 28px; color: var(--error); margin-bottom: 10px; opacity: 0.5; }
+    .receipt-divider { text-align: center; font-family: var(--font-mono); font-size: 10px; color: #ccc; margin: 8px 0; }
+    .receipt-date { text-align: center; font-family: var(--font-mono); font-size: 12px; color: #666; margin-bottom: 10px; }
+    .receipt-item { display: flex; justify-content: space-between; padding: 4px 0; font-family: var(--font-mono); font-size: 13px; }
+    .receipt-total { display: flex; justify-content: space-between; padding: 4px 0; font-family: var(--font-mono); font-size: 14px; font-weight: 700; border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 4px; }
+    .ocr-result { display: flex; flex-direction: column; gap: 10px; }
+    .ocr-status { text-align: center; font-size: 13px; font-weight: 500; padding: 8px; background: #E6F4EA; border-radius: var(--radius-sm); color: #137333; }
+    .claim-summary { background: var(--surface-variant); border-radius: var(--radius-md); border: 1px solid var(--outline); overflow: hidden; }
+    .claim-row { display: flex; justify-content: space-between; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--outline); }
+    .claim-row:last-child { border-bottom: none; }
+    .claim-total { font-weight: 700; font-size: 14px; background: var(--surface); }
+
+    /* ── Hub ── */
+    .hub-search { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--surface-variant); border: 1px solid var(--outline); border-radius: var(--radius-lg); }
+    .hub-search input { flex: 1; border: none; outline: none; font-family: var(--font-body); font-size: 14px; background: transparent; }
+    .hub-chip { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--outline); font-family: var(--font-mono); font-size: 11px; font-weight: 700; cursor: pointer; transition: all var(--transition-fast); color: var(--on-surface-variant); }
+    .hub-chip:hover { border-color: var(--primary); color: var(--primary); background: #E8F0FE; }
+    .hub-category { background: var(--surface-variant); border-radius: var(--radius-md); border: 1px solid var(--outline); overflow: hidden; }
+    .hub-category-main { display: flex; align-items: center; padding: 14px; cursor: pointer; transition: background var(--transition-fast); }
+    .hub-category-main:hover { background: rgba(0,0,0,0.02); }
+    .hub-submenu { padding: 0 14px 14px 40px; }
+    .hub-subitem { padding: 8px 0; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--outline); transition: color var(--transition-fast); }
+    .hub-subitem:last-child { border-bottom: none; }
+    .hub-subitem:hover { color: var(--primary); }
+    .hub-recent { display: flex; align-items: center; gap: 8px; padding: 6px 8px; cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; transition: background var(--transition-fast); }
+    .hub-recent:hover { background: var(--surface-variant); }
+
+    /* ── Chat Options + Verdict ── */
+    .chat-options {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 0 16px 12px 16px;
+    }
+    .chat-option {
+      width: 100%; padding: 10px 14px;
+      background: var(--surface); border: 1px solid var(--outline);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 13px; text-align: left;
+      cursor: pointer; transition: all var(--transition-fast);
+      color: var(--on-surface);
+    }
+    .chat-option:hover { border-color: var(--primary); background: #E8F0FE; }
+    .chat-option-type { text-align: center; color: var(--on-surface-variant); font-size: 12px; padding: 8px; }
+    .verdict-card {
+      margin: 12px 16px; padding: 16px;
+      border: 2px solid var(--primary); border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+    .verdict-header { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .verdict-confidence { font-size: 11px; color: var(--on-surface-variant); margin: 8px 0; font-style: italic; }
+    .verdict-action {
+      display: inline-block; padding: 6px 14px; border-radius: 20px;
+      color: white; font-size: 12px; font-weight: 700; margin: 8px 0;
+    }
+    .chat-history-summary {
+      margin: 0 16px 12px 16px; padding: 8px 12px;
+      background: #E8F0FE; border-radius: var(--radius-sm);
+      font-size: 11px; color: var(--primary); line-height: 1.5;
+    }
+    .chat-history-summary span { font-weight: 700; }
+    .booking-progress { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+    .booking-step { font-size: 13px; color: var(--on-surface-variant); padding: 8px; border-left: 3px solid var(--outline); transition: all 0.3s; }
+    .booking-step.active { color: var(--primary); border-left-color: var(--primary); font-weight: 700; }
+    .symptom-confirm { padding: 8px 12px; background: #E8F0FE; border-radius: var(--radius-sm); margin-top: 8px; }
+    .confirm-label { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .confirm-detail { font-size: 12px; color: var(--on-surface-variant); line-height: 1.5; }
+    .clinic-detail-card { background: var(--surface-variant); border-radius: var(--radius-md); border: 1px solid var(--outline); overflow: hidden; }
+    .clinic-detail-row { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--outline); align-items: center; }
+    .clinic-detail-row:last-child { border-bottom: none; }
+    .clinic-detail-row .ph { font-size: 18px; color: var(--primary); flex-shrink: 0; }
+    .detail-label { display: block; font-size: 10px; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.04em; }
+    .detail-value { font-size: 13px; font-weight: 500; }
+    .route-map { margin: 8px 0; padding: 16px; background: linear-gradient(135deg,#E8F0FE,#D2E3FC,#E8F0FE); border-radius: var(--radius-md); position: relative; }
+    .route-start, .route-end { font-size: 12px; font-weight: 700; padding: 4px 0; }
+    .route-start { color: var(--primary); }
+    .route-end { color: var(--error); text-align: right; }
+    .route-line { height: 40px; margin: 4px 0 4px 10px; border-left: 3px dashed var(--primary); position: relative; }
+    .route-line::after { content: '🚶 5 min'; position: absolute; left: 8px; top: 10px; font-size: 10px; color: var(--on-surface-variant); background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px; }
+    .booking-tips { padding: 10px 14px; background: #FFF8E1; border-radius: var(--radius-sm); font-size: 12px; color: var(--on-surface-variant); line-height: 1.6; }
+    .rx-camera { background: #1a1a1c; border-radius: var(--radius-lg); padding: 24px; text-align: center; }
+    .rx-viewfinder { width: 100%; }
+    .rx-corners { width: 240px; height: 120px; margin: 0 auto 16px; border: 2px solid rgba(26,115,232,0.4); border-radius: 12px; animation: scanPulse 2s ease-in-out infinite; }
+    .rx-hint { font-size: 14px; color: white; font-weight: 500; }
+    .rx-result { margin-top: 12px; }
+    .rx-drug-card { display: flex; gap: 14px; padding: 14px; background: #F0F6FF; border: 2px solid var(--primary); border-radius: var(--radius-md); align-items: center; }
+    .rx-drug-icon { font-size: 32px; }
+    .rx-drug-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+    .rx-drug-detail { font-size: 12px; color: var(--on-surface-variant); margin-top: 2px; }
+    .pharmacy-progress { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+    .pharmacy-step { font-size: 13px; color: var(--on-surface-variant); padding: 10px; border-left: 3px solid var(--outline); transition: all 0.3s; }
+    .pharmacy-step.active { color: var(--primary); border-left-color: var(--primary); font-weight: 700; }
+    .pickup-code-card { text-align: center; padding: 20px; background: linear-gradient(135deg,#E8F0FE,#D2E3FC); border-radius: var(--radius-lg); border: 2px dashed var(--primary); }
+    .pickup-label { font-size: 11px; color: var(--on-surface-variant); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .pickup-code { font-family: var(--font-mono); font-size: 32px; font-weight: 700; color: var(--primary); letter-spacing: 0.1em; }
+    .pickup-drug { font-size: 13px; color: var(--on-surface-variant); margin-top: 8px; }
+    .translate-mini { margin-top: 12px; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--outline); overflow: hidden; }
+    .translate-mini-header { padding: 12px 14px; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--outline); display: flex; align-items: center; gap: 8px; background: var(--surface-variant); }
+    .lt-mic-area { text-align: center; padding: 20px 0 12px; }
+    .lt-mic-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; margin: 0 auto; }
+    .lt-mic-btn.pulsing { animation: pulseGlow 2s ease-in-out infinite; }
+    .lt-mic-hint { font-size: 12px; color: var(--on-surface-variant); margin-top: 8px; }
+    .lt-bubbles { display: flex; flex-direction: column; gap: 4px; padding: 0 14px; margin-bottom: 8px; }
+    .lt-bubble { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast); font-size: 13px; gap: 8px; }
+    .lt-bubble-user { background: #E8F0FE; color: var(--primary); align-self: flex-start; max-width: 85%; border-bottom-left-radius: 4px; }
+    .lt-bubble-user:hover { background: #D2E3FC; }
+    .lt-bubble-jp { background: var(--surface-variant); color: var(--on-surface); align-self: flex-end; max-width: 85%; border-bottom-right-radius: 4px; text-align: right; }
+    .lt-bubble-jp:hover { background: #E8EAED; }
+    .lt-bubble .ph { font-size: 14px; flex-shrink: 0; opacity: 0.5; }
+    .claim-form-card { background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
+    .claim-form-header { padding: 14px; font-family: var(--font-display); font-size: 15px; font-weight: 700; text-align: center; background: var(--surface-variant); border-bottom: 2px solid var(--primary); color: var(--primary); }
+    .claim-section { padding: 0; border-bottom: 1px solid var(--outline); }
+    .claim-section:last-child { border-bottom: none; }
+    .claim-section-title { padding: 8px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--on-surface-variant); background: var(--surface-variant); }
+    .claim-field { display: flex; justify-content: space-between; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+    .claim-field:last-child { border-bottom: none; }
+    .claim-field span:first-child { color: var(--on-surface-variant); }
+    .claim-field span:last-child { font-weight: 500; text-align: right; }
+    .claim-total-field { background: #E8F0FE; font-weight: 700 !important; }
+    .claim-total-field span { font-weight: 700 !important; color: var(--primary) !important; }
+    .claim-actions { display: flex; flex-direction: column; gap: 8px; }
+    .insurance-cover-card { margin-top: 12px; background: var(--surface); border: 1px solid var(--outline); border-radius: var(--radius-lg); overflow: hidden; }
+    .insurance-cover-header { padding: 12px 14px; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--primary); border-bottom: 1px solid var(--outline); display: flex; align-items: center; gap: 8px; background: var(--surface-variant); }
+    .insurance-cover-grid { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .insurance-cover-item { display: flex; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); align-items: flex-start; font-size: 12px; }
+    .insurance-cover-item .ph { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .insurance-cover-item.yes .ph { color: #34A853; }
+    .insurance-cover-item.yes { background: #F6FEF6; }
+    .insurance-cover-item.warn .ph { color: var(--warning); }
+    .insurance-cover-item.warn { background: #FFFBF0; }
+    .insurance-cover-item strong { display: block; font-size: 12px; margin-bottom: 2px; }
+    .insurance-cover-item p { font-size: 11px; color: var(--on-surface-variant); line-height: 1.4; }
+    .no-insurance-card { padding: 12px 14px; background: #FFF8E1; border-radius: var(--radius-sm); font-size: 12px; color: var(--on-surface-variant); line-height: 1.6; margin-top: 8px; }
+    .insurance-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface-variant); border-radius: var(--radius-md); border: 1px solid var(--outline); margin-bottom: 4px; font-size: 13px; font-weight: 500; }
+    .toggle-switch { display: flex; gap: 4px; background: var(--outline); border-radius: var(--radius-sm); padding: 2px; }
+    .toggle-btn { padding: 6px 14px; border: none; background: transparent; border-radius: 6px; font-family: var(--font-body); font-size: 12px; cursor: pointer; font-weight: 500; transition: all var(--transition-fast); }
+    .toggle-btn.active { background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.1); font-weight: 700; }
+    .cost-card { transition: all 0.3s; }
+    .cost-card.uncovered { border-color: var(--error) !important; background: #FFF5F5 !important; }
+    .cost-status { font-size: 11px; margin-top: 6px; font-weight: 500; }
+    .covered-text { color: #137333; }
+    .uncovered-text { color: var(--error); }
+    .intake-actions { display: flex; gap: 8px; }
+    .rx-document { background:#fafaf5; border:2px solid #333; border-radius:4px; overflow:hidden; font-family:var(--font-body); }
+    .rx-doc-header { padding:16px; border-bottom:2px solid #333; }
+    .rx-doc-title { text-align:center; font-size:22px; font-weight:900; letter-spacing:0.3em; color:#111; margin-bottom:12px; }
+    .rx-doc-meta { display:flex; flex-direction:column; gap:4px; }
+    .rx-meta-row { display:flex; gap:8px; font-size:12px; }
+    .rx-meta-row span:first-child { color:#555; min-width:60px; }
+    .rx-meta-row span:last-child { font-weight:700; }
+    .rx-meds-list { padding:8px 12px; }
+    .rx-med-item { padding:10px 8px; border-bottom:1px dashed #ccc; cursor:pointer; transition:background 0.2s; }
+    .rx-med-item:hover { background:#f0f0e8; }
+    .rx-med-item:last-child { border-bottom:none; }
+    .rx-med-top { display:flex; align-items:center; gap:10px; }
+    .rx-med-num { width:22px;height:22px;border-radius:50%;background:#333;color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .rx-med-info { flex:1; }
+    .rx-med-name { font-size:14px;font-weight:700; }
+    .rx-med-en { font-size:10px;color:#888; }
+    .rx-med-qty { font-size:15px;font-weight:900; }
+    .rx-med-detail { margin-top:8px;padding:8px;background:#f5f5f0;border-radius:4px; }
+    .rx-detail-row { display:flex;gap:8px;font-size:11px;padding:2px 0; }
+    .rx-detail-row span:first-child { color:#555;min-width:30px; }
+    .rx-doc-footer { padding:12px 14px;background:#fff8e1;border-top:2px solid #333;font-size:10px;color:#666;line-height:1.5;text-align:center; }
+    .emergency-call-header { text-align: center; padding: 16px; background: #FFF5F5; border-radius: var(--radius-lg); border: 2px solid var(--error); }
+    .ec-status { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--error); }
+    .ec-timer { font-family: var(--font-mono); font-size: 24px; color: var(--on-surface-variant); margin-top: 4px; }
+    .ec-progress { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }
+    .ec-step { font-size: 13px; color: var(--on-surface-variant); padding: 10px; border-left: 3px solid var(--outline); transition: all 0.3s; }
+    .ec-step.active { color: var(--error); border-left-color: var(--error); font-weight: 700; }
+    .ec-instructions { margin-top: 8px; }
+    .ins-form { display: flex; flex-direction: column; gap: 12px; }
+    .ins-field { display: flex; flex-direction: column; gap: 4px; }
+    .ins-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--on-surface-variant); }
+    .ins-select, .ins-input { padding: 10px 12px; border: 1px solid var(--outline); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 14px; background: var(--surface); width: 100%; }
+    .ins-result { margin-top: 12px; padding: 14px; background: #F6FEF6; border-radius: var(--radius-md); border: 1px solid #34A853; }
+    .ins-result-header { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .ins-coverage-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+    .ins-coverage-item .cov-yes { color: #137333; }
+    .ins-coverage-item .cov-no { color: var(--error); }
+    .ins-coverage-item .cov-partial { color: #B06000; }
+    .btn-scan {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px; background: var(--surface); border: 2px dashed var(--primary);
+      border-radius: var(--radius-md); font-family: var(--font-body); font-size: 13px;
+      font-weight: 700; color: var(--primary); cursor: pointer; transition: all var(--transition-fast);
+    }
+    .btn-scan:hover { background: #E8F0FE; }
+    .scan-overlay {
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: #1a1a1c; border-radius: var(--radius-lg);
+      min-height: 200px; position: relative; overflow: hidden;
+    }
+    .scan-viewfinder {
+      width: 100%; text-align: center;
+    }
+    .scan-corners {
+      width: 200px; height: 150px; margin: 0 auto 16px;
+      border: 2px solid rgba(255,255,255,0.4); border-radius: 12px;
+      position: relative;
+      animation: scanPulse 2s ease-in-out infinite;
+    }
+    @keyframes scanPulse {
+      0%,100% { border-color: rgba(26,115,232,0.4); box-shadow: inset 0 0 0 0 rgba(26,115,232,0.1); }
+      50% { border-color: rgba(26,115,232,0.8); box-shadow: inset 0 0 20px 0 rgba(26,115,232,0.2); }
+    }
+    .scan-text { font-size: 14px; color: white; font-weight: 500; min-height: 20px; }
+    @media (max-width: 767px) {
+      .top-bar { padding: 0 12px; height: 56px; }
+      .logo { font-size: 17px; }
+      .step-indicator { display: none; }
+      .main-content { flex-direction: column; align-items: center; padding: 16px 0; gap: 0; }
+      .phone-wrapper { width: 100%; }
+      .phone-frame { width: 100%; height: calc(100dvh - 56px - 72px); border-radius: 0; border: none; box-shadow: none; }
+      .phone-notch { display: none; }
+      .phone-screen { padding-top: 0; }
+      .tech-sidebar { display: none !important; }
+      .tech-toggle { display: none; }
+      .nav-bar { padding: 0 12px; height: 64px; gap: 12px; }
+      .nav-btn { padding: 8px 14px; font-size: 13px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .intake-row { grid-template-columns: 1fr; }
+      .intake-col-jp { border-right: none; border-bottom: 1px solid var(--outline); }
+      .severity-card, .script-card, .interaction-card { border-radius: 0; border-left: none; border-right: none; }
+    }
+
+    @media print {
+      .top-bar, .nav-bar, .phone-frame, .tech-sidebar { display: none !important; }
+      .main-content { padding: 0; }
+      body { background: white; }
+      .phone-screen { width: 100%; max-width: 800px; margin: 0 auto; overflow: visible; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="top-bar-left"><span class="logo">MediRoute</span></div>
+    <div class="top-bar-right">
+      <span class="step-indicator" id="stepIndicator"></span>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="phone-wrapper">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="phoneScreen"></div>
+      </div>
+    </div>
+    <aside class="tech-sidebar" id="techSidebar">
+      <div class="sidebar-header"><h3>What Gemini did</h3><button class="sidebar-close" id="sidebarClose">&times;</button></div>
+      <div class="sidebar-body" id="sidebarBody"></div>
+    </aside>
+  </main>
+
+  <nav class="nav-bar">
+    <button class="nav-btn" id="backBtn" disabled><i class="ph ph-arrow-left"></i> <span class="nav-label">Back</span></button>
+    <div class="progress-dots" id="progressDots"></div>
+    <button class="nav-btn" id="nextBtn"><span class="nav-label">Next</span> <i class="ph ph-arrow-right"></i></button>
+  </nav>
+
+  <script>
+    // ══════════════════════════════════════════
+    // DATA LAYER
+    // ══════════════════════════════════════════
+    const clinics = {
+      emergency: [
+        { name: "St. Luke's International", specialty: "Emergency", language: "🇬🇧 English", distance: "1.2km", hours: "24h", phone: "03-5550-7120" },
+        { name: "Tokyo Medical University", specialty: "Emergency", language: "🇬🇧 English available", distance: "2.8km", hours: "24h", phone: "03-3342-6111" },
+        { name: "JCHO Tokyo Yamate", specialty: "Emergency", language: "🇯🇵 Japanese only", distance: "3.5km", hours: "24h", phone: "03-3205-7211" },
+      ],
+      internal: [
+        { name: "Shinjuku Clinic", specialty: "Internal Medicine", language: "🇬🇧 English", distance: "0.8km", hours: "9:00-19:00", phone: "03-3350-1212" },
+        { name: "Tokyo Midtown Medical", specialty: "Internal Medicine", language: "🇬🇧 English available", distance: "2.1km", hours: "9:00-21:00", phone: "03-5413-0080" },
+      ],
+      pediatric: [
+        { name: "National Center for Child Health", specialty: "Pediatrics", language: "🇬🇧 English", distance: "3.0km", hours: "24h", phone: "03-3416-0181" },
+        { name: "Tokyo Children's Clinic", specialty: "Pediatrics", language: "🇬🇧 Some English", distance: "1.5km", hours: "9:00-18:00", phone: "03-3355-2200" },
+      ],
+      dental: [
+        { name: "Shinjuku Dental Office", specialty: "Dentistry", language: "🇬🇧 English", distance: "0.5km", hours: "10:00-19:00", phone: "03-3356-7890" },
+      ],
+      orthopedics: [
+        { name: "Tokyo Sports Medicine Clinic", specialty: "Orthopedics", language: "🇬🇧 Some English", distance: "2.5km", hours: "9:00-18:00", phone: "03-3400-1111" },
+      ],
+      pharmacy: [
+        { name: "Shinjuku Pharmacy", specialty: "Pharmacy", language: "🇬🇧 English pharmacist", distance: "0.6km", hours: "9:00-22:00", phone: "03-3350-9999" },
+        { name: "Matsumoto Kiyoshi", specialty: "Pharmacy", language: "🇯🇵 Japanese only", distance: "0.8km", hours: "10:00-21:00", phone: "03-3351-2222" },
+        { name: "Tomod's Shinjuku", specialty: "Pharmacy", language: "🇬🇧 Some English", distance: "1.0km", hours: "9:00-23:00", phone: "03-3352-3333" },
+      ],
+    };
+
+    const KEYWORD_ROUTES = [
+      { kw: ["chest pain","shortness of breath","can't breathe","heart attack","chest hurts"], route: "chest-pain" },
+      { kw: ["bleeding","cut myself","accident","blood","injured badly"], route: "bleeding" },
+      { kw: ["hit my head","fell","concussion","head injury","knocked out"], route: "head-injury" },
+      { kw: ["my child","baby","toddler","infant","my kid","child fever"], route: "child-emergency" },
+      { kw: ["prescription","need medication","get medicine","see doctor","clinic visit"], route: "get-prescription" },
+      { kw: ["fever","flu","cough","sore throat","cold","temperature"], route: "moderate-fever" },
+      { kw: ["headache","rash","stomach ache","diarrhea","nauseous","nausea"], route: "mild-symptoms" },
+      { kw: ["sprained","twisted","burn","hurt my","fell and hurt"], route: "injury" },
+      { kw: ["tooth","dental","dentist","gum","toothache"], route: "dental" },
+      { kw: ["translate","prescription label","read this label","translate this"], route: "pharmacy-translate" },
+      { kw: ["at the doctor","need to explain","speak to doctor","doctor visit"], route: "doctor-translate" },
+      { kw: ["how much","can't afford","no insurance","expensive","cost","price","bill"], route: "cost-info" },
+      { kw: ["can't pay","leave without paying","skip bill","visa"], route: "cost-info" },
+      { kw: ["lost my med","ran out of","left my med","missing medication"], route: "lost-medication" },
+      { kw: ["can i bring","is x legal","flying with","customs","bring medication","adderall","vyvanse","ritalin","sudafed","vicks","codeine","xanax","valium"], route: "pre-travel-check" },
+      { kw: ["warfarin","metformin","interaction","drug interaction","check interaction"], route: "drug-interaction" },
+    ];
+
+    function matchKeywordRoute(text) {
+      const lower = text.toLowerCase();
+      for (const entry of KEYWORD_ROUTES) for (const kw of entry.kw) if (lower.includes(kw)) return entry.route;
+      return null;
+    }
+
+    // Chat Triage Trees
+    const CHAT_TREES = {
+      "chest-pain": {
+        start: "location",
+        nodes: {
+          location: { q: "Where exactly is the pain?", opts: [
+            {l:"Left side / center",v:"left",n:"radiation"},{l:"Right side",v:"right",n:"rightCause"},{l:"General / across chest",v:"general",n:"generalChest"},{l:"🤷 I'm not sure",v:"unsure",n:"unsureChest",b:1}]},
+          radiation: { q: "Does it radiate to your left arm, jaw, or shoulder?", opts: [
+            {l:"Yes — arm or jaw",v:"yes",n:"cardiacSymptoms"},{l:"No — stays in chest",v:"no",n:"breathingCheck"},{l:"🤷 Not sure",v:"unsure",n:"cardiacSymptoms",b:0.5}]},
+          cardiacSymptoms: { q: "Any of these: sweating, nausea, dizziness, or palpitations?", opts: [
+            {l:"Yes — sweating",v:"sweat",n:"severityCardiac"},{l:"Yes — nausea/dizzy",v:"nausea",n:"severityCardiac"},{l:"Yes — multiple",v:"multiple",n:"severityCardiac"},{l:"None of these",v:"none",n:"breathingCheck"}]},
+          severityCardiac: { q: "How severe is the pain? 1 (mild) to 10 (worst ever)", opts: [
+            {l:"7-10 — very severe",v:"high",n:"verdictSev1"},{l:"4-6 — moderate",v:"mid",n:"verdictSev2"},{l:"1-3 — mild",v:"low",n:"verdictSev3"}]},
+          breathingCheck: { q: "Is the pain worse with deep breathing or movement?", opts: [
+            {l:"Worse with breathing",v:"breath",n:"suddenCheck"},{l:"Worse with movement",v:"move",n:"injuryCheck"},{l:"No difference",v:"none",n:"generalChest"}]},
+          suddenCheck: { q: "Did the pain start suddenly?", opts: [
+            {l:"Yes — very suddenly",v:"yes",n:"verdictSev1_pulm"},{l:"No — gradually",v:"no",n:"durationCheck"}]},
+          injuryCheck: { q: "Any recent injury or fall?", opts: [
+            {l:"Yes — recent injury",v:"yes",n:"verdictSev2_injury"},{l:"No injury",v:"no",n:"coughCheck"}]},
+          coughCheck: { q: "Any cough or fever?", opts: [
+            {l:"Yes — cough + fever",v:"yes",n:"verdictSev3_resp"},{l:"Just cough",v:"cough",n:"verdictSev4"},{l:"None",v:"none",n:"verdictSev4"}]},
+          rightCause: { q: "Any recent injury or persistent cough?", opts: [
+            {l:"Recent injury",v:"inj",n:"verdictSev2_injury"},{l:"Persistent cough",v:"cough",n:"verdictSev3_resp"},{l:"Neither",v:"none",n:"durationCheck2"}]},
+          generalChest: { q: "Any other symptoms — shortness of breath, palpitations, anxiety?", opts: [
+            {l:"Shortness of breath",v:"sob",n:"verdictSev2"},{l:"Palpitations / anxiety",v:"palp",n:"verdictSev4_anxiety"},{l:"No other symptoms",v:"none",n:"verdictSev4"}]},
+          durationCheck: { q: "How long has this been going on?", opts: [
+            {l:"Hours to 1 day",v:"short",n:"verdictSev3"},{l:"Days to weeks",v:"long",n:"verdictSev4"}]},
+          durationCheck2: { q: "How long has this been going on?", opts: [
+            {l:"Hours",v:"short",n:"verdictSev3"},{l:"Days",v:"long",n:"verdictSev4"}]},
+          unsureChest: { q: "Is the pain constant or does it come and go?", opts: [
+            {l:"Constant",v:"const",n:"verdictSev2"},{l:"Comes and goes",v:"inter",n:"verdictSev3"}]},
+          // Verdicts
+          verdictSev1: { verdict: { level:1, route:"chest-pain", title:"🚨 Possible Cardiac Event", summary:"Left chest pain radiating to arm + sweating + high severity strongly suggests a cardiac event.", confidence:"I'm fairly confident — this needs immediate attention.", action:"CALL 119 NOW" }},
+          verdictSev1_pulm: { verdict: { level:1, route:"chest-pain", title:"🚨 Possible Pulmonary Issue", summary:"Sudden chest pain worse with breathing could indicate a pulmonary embolism or pneumothorax.", confidence:"This could be serious — err on the side of caution.", action:"CALL 119 NOW" }},
+          verdictSev2: { verdict: { level:2, route:"chest-pain", title:"⚠️ Urgent — Possible Cardiac", summary:"Your symptoms suggest a potential cardiac issue that needs evaluation within hours.", confidence:"Moderate confidence — better to get checked.", action:"Go to ER immediately" }},
+          verdictSev2_injury: { verdict: { level:2, route:"injury", title:"⚠️ Possible Rib Injury", summary:"Chest pain after injury could be a rib fracture or bruising.", confidence:"Likely musculoskeletal — but needs X-ray.", action:"Find a clinic today" }},
+          verdictSev3: { verdict: { level:3, route:"moderate-fever", title:"🏥 Needs Evaluation", summary:"Your chest pain needs medical evaluation within 24 hours.", confidence:"Could be several things — let's get it checked.", action:"Find a clinic today" }},
+          verdictSev3_resp: { verdict: { level:3, route:"moderate-fever", title:"🏥 Possible Respiratory Infection", summary:"Chest pain with cough and fever suggests bronchitis or pneumonia.", confidence:"Likely infection — treatable with medication.", action:"Find a clinic today" }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild Concern", summary:"Your symptoms don't suggest an emergency. Monitor and rest.", confidence:"Low concern — but come back if it worsens.", action:"Self-care, monitor 48h" }},
+          verdictSev4_anxiety: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Possible Anxiety", summary:"Chest pain with palpitations can be anxiety-related, especially under travel stress.", confidence:"Likely not cardiac — but monitor carefully.", action:"Rest, monitor. Return if worsens." }},
+        }
+      },
+      "fever": {
+        start: "temp",
+        nodes: {
+          temp: { q: "What's your temperature? If you don't have a thermometer, how do you feel?", opts: [
+            {l:"Above 39°C / very hot",v:"high",n:"highFever"},{l:"38-39°C / warm",v:"mid",n:"midFever"},{l:"Below 38°C / mild",v:"low",n:"mildSymptoms"},{l:"🤷 I can't check",v:"unsure",n:"unsureFever",b:0.5}]},
+          highFever: { q: "Any stiff neck, confusion, or severe headache?", opts: [
+            {l:"Yes — stiff neck or confused",v:"yes",n:"verdictSev1_mening"},{l:"Severe headache only",v:"head",n:"verdictSev2"},{l:"None of these",v:"none",n:"durationFeverHigh"}]},
+          midFever: { q: "Other symptoms? (select all that apply)", opts: [
+            {l:"Cough / sore throat",v:"cough",n:"verdictSev3_flu"},{l:"Body aches / fatigue",v:"aches",n:"verdictSev3_flu"},{l:"Nausea / stomach",v:"nausea",n:"verdictSev3_gastro"},{l:"Just fever",v:"none",n:"durationFeverMid"}]},
+          mildSymptoms: { q: "How long have you had this?", opts: [
+            {l:"Less than 2 days",v:"short",n:"verdictSev4_rest"},{l:"3+ days",v:"long",n:"verdictSev3"}]},
+          unsureFever: { q: "Do you feel hot/cold chills, or just generally unwell?", opts: [
+            {l:"Hot + chills",v:"chills",n:"midFever"},{l:"Just unwell / tired",v:"tired",n:"mildSymptoms"}]},
+          durationFeverHigh: { q: "How long has the fever lasted?", opts: [
+            {l:"Less than 24h",v:"short",n:"verdictSev2"},{l:"1-3 days",v:"mid",n:"verdictSev2"},{l:"4+ days",v:"long",n:"verdictSev1"}]},
+          durationFeverMid: { q: "How long?", opts: [
+            {l:"1-2 days",v:"short",n:"verdictSev3_flu"},{l:"3+ days",v:"long",n:"verdictSev2"}]},
+          verdictSev1_mening: { verdict: { level:1, route:"child-emergency", title:"🚨 Possible Meningitis", summary:"High fever + stiff neck is a meningitis red flag.", confidence:"This is serious — don't wait.", action:"CALL 119 NOW" }},
+          verdictSev1: { verdict: { level:1, route:"moderate-fever", title:"🚨 Prolonged High Fever", summary:"Fever lasting 4+ days needs emergency evaluation.", confidence:"Could indicate serious infection.", action:"CALL 119 or go to ER" }},
+          verdictSev2: { verdict: { level:2, route:"moderate-fever", title:"⚠️ High Fever — Urgent", summary:"High fever needs medical attention within hours.", confidence:"Moderate — better to be seen.", action:"Find a clinic today" }},
+          verdictSev3_flu: { verdict: { level:3, route:"moderate-fever", title:"🏥 Likely Flu or Respiratory Infection", summary:"Fever with cough/aches fits a viral pattern.", confidence:"Likely viral — rest + clinic if worsens.", action:"Find a clinic within 24h" }},
+          verdictSev3_gastro: { verdict: { level:3, route:"moderate-fever", title:"🏥 Possible Gastroenteritis", summary:"Fever with nausea/stomach upset.", confidence:"Likely food-related — stay hydrated.", action:"Pharmacy or clinic" }},
+          verdictSev3: { verdict: { level:3, route:"moderate-fever", title:"🏥 Needs Evaluation", summary:"Your fever pattern suggests you should see a doctor.", confidence:"Better to get checked.", action:"Find a clinic within 24h" }},
+          verdictSev4_rest: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild — Rest & Monitor", summary:"Mild fever under 2 days. Rest, hydrate, monitor.", confidence:"Low concern — likely viral.", action:"Self-care. Return if worsens." }},
+        }
+      },
+      "headache": {
+        start: "type",
+        nodes: {
+          type: { q: "What kind of headache?", opts: [
+            {l:"Throbbing, one side",v:"throb",n:"throbHead"},{l:"Pressure, both sides",v:"press",n:"pressHead"},{l:"Sharp, sudden 'thunderclap'",v:"sharp",n:"verdictSev1_thunder"},{l:"🤷 Not sure",v:"unsure",n:"pressHead"}]},
+          throbHead: { q: "Any sensitivity to light or sound? Nausea?", opts: [
+            {l:"Yes — light sensitivity + nausea",v:"yes",n:"verdictSev3_migraine"},{l:"Mild sensitivity only",v:"mild",n:"durationHead"},{l:"None",v:"none",n:"durationHead"}]},
+          pressHead: { q: "Any stiff neck or fever?", opts: [
+            {l:"Yes — stiff neck + fever",v:"yes",n:"verdictSev1_mening"},{l:"Mild neck tension only",v:"mild",n:"verdictSev4_tension"},{l:"No — neither",v:"none",n:"durationHead"}]},
+          durationHead: { q: "How long?", opts: [
+            {l:"Hours",v:"short",n:"verdictSev3"},{l:"Days",v:"long",n:"verdictSev4"}]},
+          verdictSev1_thunder: { verdict: { level:1, route:"head-injury", title:"🚨 Thunderclap Headache", summary:"Sudden severe headache could indicate a brain bleed.", confidence:"This is a red flag — don't wait.", action:"CALL 119 NOW" }},
+          verdictSev3_migraine: { verdict: { level:3, route:"mild-symptoms", title:"🏥 Likely Migraine", summary:"Throbbing one-sided headache with light sensitivity fits migraine.", confidence:"Likely migraine — treatable.", action:"Find a clinic or pharmacy" }},
+          verdictSev4_tension: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Likely Tension Headache", summary:"Pressure both sides is typical of tension headache.", confidence:"Low concern — rest and OTC meds.", action:"Self-care. Pharmacy for pain relief." }},
+          verdictSev3: { verdict: { level:3, route:"mild-symptoms", title:"🏥 Headache — Get Checked", summary:"Persistent headache should be evaluated.", confidence:"Likely not serious — but get checked.", action:"Find a clinic" }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild Headache", summary:"Rest, hydrate, OTC pain relief.", confidence:"Low concern.", action:"Self-care. Return if worsens." }},
+        }
+      },
+      "abdominal": {
+        start: "location",
+        nodes: {
+          location: { q: "Where is the pain?", opts: [
+            {l:"Lower right",v:"lr",n:"lowerRight"},{l:"Upper center",v:"uc",n:"upperCenter"},{l:"General / all over",v:"gen",n:"generalAbdo"},{l:"🤷 Not sure",v:"unsure",n:"generalAbdo"}]},
+          lowerRight: { q: "Any nausea, vomiting, or fever?", opts: [
+            {l:"Yes — all three",v:"all",n:"verdictSev1_appendix"},{l:"Nausea only",v:"nausea",n:"verdictSev2"},{l:"None",v:"none",n:"durationAbdo"}]},
+          upperCenter: { q: "After eating? What kind of food?", opts: [
+            {l:"After greasy/fatty food",v:"greasy",n:"verdictSev3_gall"},{l:"After anything",v:"any",n:"verdictSev3_ulcer"},{l:"Not food-related",v:"no",n:"durationAbdo"}]},
+          generalAbdo: { q: "Any diarrhea or vomiting?", opts: [
+            {l:"Diarrhea",v:"diarr",n:"verdictSev4_gastro"},{l:"Vomiting",v:"vomit",n:"verdictSev3"},{l:"Both",v:"both",n:"verdictSev3"},{l:"Neither",v:"none",n:"durationAbdo"}]},
+          durationAbdo: { q: "How long?", opts: [
+            {l:"Hours",v:"short",n:"verdictSev3"},{l:"Days",v:"long",n:"verdictSev4"}]},
+          verdictSev1_appendix: { verdict: { level:1, route:"bleeding", title:"🚨 Possible Appendicitis", summary:"Lower right pain + nausea + fever is the classic appendicitis triad.", confidence:"This needs immediate surgical evaluation.", action:"CALL 119 NOW" }},
+          verdictSev2: { verdict: { level:2, route:"moderate-fever", title:"⚠️ Acute Abdominal Pain", summary:"Your symptoms suggest an acute condition needing urgent evaluation.", confidence:"Better to be seen quickly.", action:"Go to ER" }},
+          verdictSev3_gall: { verdict: { level:3, route:"moderate-fever", title:"🏥 Possible Gallbladder Issue", summary:"Pain after fatty foods suggests gallbladder.", confidence:"Likely gallbladder — clinic evaluation needed.", action:"Find a clinic today" }},
+          verdictSev3_ulcer: { verdict: { level:3, route:"moderate-fever", title:"🏥 Possible Ulcer or Gastritis", summary:"Upper center pain after eating.", confidence:"Likely gastric — treatable.", action:"Find a clinic" }},
+          verdictSev3: { verdict: { level:3, route:"moderate-fever", title:"🏥 Needs Evaluation", summary:"Abdominal pain requires medical evaluation within 24h.", confidence:"Several possible causes.", action:"Find a clinic today" }},
+          verdictSev4_gastro: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Likely Gastroenteritis", summary:"General pain with diarrhea — likely stomach bug or food poisoning.", confidence:"Common in travelers — rest and hydrate.", action:"Self-care. Pharmacy for rehydration." }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild — Monitor", summary:"Rest, light diet, hydrate.", confidence:"Low concern currently.", action:"Self-care. Return if worsens." }},
+        }
+      },
+      "injury": {
+        start: "mechanism",
+        nodes: {
+          mechanism: { q: "What happened?", opts: [
+            {l:"Fell from height or hard impact",v:"fall",n:"mobilityCheck"},{l:"Twisted / sprained",v:"twist",n:"weightCheck"},{l:"Cut / wound / burn",v:"cut",n:"woundCheck"}]},
+          mobilityCheck: { q: "Can you move the injured area?", opts: [
+            {l:"No — can't move at all",v:"cant",n:"verdictSev1_fracture"},{l:"Yes — but very painful",v:"pain",n:"verdictSev2_fracture"},{l:"Yes — some pain",v:"some",n:"verdictSev3_sprain"}]},
+          weightCheck: { q: "Can you put weight on it?", opts: [
+            {l:"No — can't bear weight",v:"no",n:"verdictSev2_fracture"},{l:"Yes — with pain",v:"yes",n:"verdictSev3_sprain"},{l:"Yes — mild discomfort",v:"mild",n:"verdictSev4"}]},
+          woundCheck: { q: "How serious?", opts: [
+            {l:"Deep cut — won't stop bleeding",v:"deep",n:"verdictSev1_bleed"},{l:"Burn — large or blistering",v:"burn",n:"verdictSev2_burn"},{l:"Minor cut or scrape",v:"minor",n:"verdictSev4"}]},
+          verdictSev1_fracture: { verdict: { level:1, route:"injury", title:"🚨 Possible Fracture", summary:"Inability to move after fall suggests a fracture.", confidence:"Needs X-ray immediately.", action:"CALL 119 or go to ER" }},
+          verdictSev1_bleed: { verdict: { level:1, route:"bleeding", title:"🚨 Uncontrolled Bleeding", summary:"Deep wound with ongoing bleeding needs emergency care.", confidence:"Apply pressure — get help now.", action:"CALL 119 NOW" }},
+          verdictSev2_fracture: { verdict: { level:2, route:"injury", title:"⚠️ Possible Fracture or Severe Sprain", summary:"Pain with weight-bearing could be a fracture.", confidence:"Needs X-ray to confirm.", action:"Go to ER or orthopedic clinic" }},
+          verdictSev2_burn: { verdict: { level:2, route:"injury", title:"⚠️ Significant Burn", summary:"Large or blistering burns need professional care.", confidence:"Risk of infection — get treated.", action:"Go to ER" }},
+          verdictSev3_sprain: { verdict: { level:3, route:"injury", title:"🏥 Likely Sprain", summary:"Pain with some mobility — likely a sprain.", confidence:"Likely soft tissue — RICE protocol + clinic check.", action:"Find a clinic" }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Minor Injury", summary:"Rest, ice, elevation. Monitor.", confidence:"Low concern.", action:"Self-care. Pharmacy if needed." }},
+        }
+      },
+      "allergy": {
+        start: "what",
+        nodes: {
+          what: { q: "What happened?", opts: [
+            {l:"Ate something — swelling, hives",v:"food",n:"breathingCheckA"},{l:"Bee sting / insect bite",v:"bite",n:"breathingCheckA"},{l:"Skin rash from product / plant",v:"rash",n:"verdictSev4_rash"},{l:"New medication reaction",v:"med",n:"verdictSev2_med"}]},
+          breathingCheckA: { q: "Any difficulty breathing, throat tightness, or tongue swelling?", opts: [
+            {l:"Yes — trouble breathing!",v:"yes",n:"verdictSev1_anaph"},{l:"Mild throat tickle only",v:"mild",n:"verdictSev2"},{l:"No — just skin reaction",v:"no",n:"verdictSev3"}]},
+          verdictSev1_anaph: { verdict: { level:1, route:"chest-pain", title:"🚨 Possible Anaphylaxis", summary:"Difficulty breathing after exposure is a life-threatening emergency.", confidence:"This is the highest priority — act NOW.", action:"CALL 119 IMMEDIATELY" }},
+          verdictSev2_med: { verdict: { level:2, route:"moderate-fever", title:"⚠️ Drug Reaction", summary:"New medication reaction — stop taking it and get evaluated.", confidence:"Could worsen — get checked.", action:"Go to ER or clinic" }},
+          verdictSev2: { verdict: { level:2, route:"moderate-fever", title:"⚠️ Allergic Reaction", summary:"Throat involvement with allergic reaction could progress.", confidence:"Better to be monitored.", action:"Go to ER or clinic" }},
+          verdictSev3: { verdict: { level:3, route:"mild-symptoms", title:"🏥 Allergic Reaction — Skin Only", summary:"Skin reaction without breathing issues is less urgent but should be seen.", confidence:"Likely manageable — antihistamines + clinic.", action:"Find a clinic or pharmacy" }},
+          verdictSev4_rash: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Contact Dermatitis", summary:"Skin rash from product or plant — likely irritation.", confidence:"Low concern — OTC treatment.", action:"Pharmacy for antihistamine cream" }},
+        }
+      },
+      "food-poisoning": {
+        start: "symptoms",
+        nodes: {
+          symptoms: { q: "What are you experiencing?", opts: [
+            {l:"Vomiting + diarrhea",v:"both",n:"severityFP"},{l:"Diarrhea only",v:"diarr",n:"severityFP"},{l:"Vomiting only",v:"vomit",n:"severityFP"},{l:"Stomach cramps only",v:"cramps",n:"verdictSev4"}]},
+          severityFP: { q: "How severe? Any blood, or can't keep water down?", opts: [
+            {l:"Blood in stool / vomit",v:"blood",n:"verdictSev2"},{l:"Can't keep water down 12h+",v:"dehyd",n:"verdictSev2"},{l:"Frequent but keeping fluids",v:"freq",n:"verdictSev3"},{l:"Mild — occasional",v:"mild",n:"verdictSev4"}]},
+          verdictSev2: { verdict: { level:2, route:"moderate-fever", title:"⚠️ Severe Food Poisoning", summary:"Blood or dehydration risk — needs IV fluids and evaluation.", confidence:"Don't wait — dehydration is dangerous.", action:"Go to ER" }},
+          verdictSev3: { verdict: { level:3, route:"moderate-fever", title:"🏥 Food Poisoning — Get Checked", summary:"Frequent symptoms — risk of dehydration. Seek medical help.", confidence:"Likely food-borne — treatable.", action:"Find a clinic or pharmacy for ORS" }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild Food Poisoning", summary:"Rest, hydrate with ORS, eat bland food.", confidence:"Should resolve in 24-48h.", action:"Self-care. Pharmacy for rehydration salts." }},
+        }
+      },
+      "medication": {
+        start: "drug",
+        nodes: {
+          drug: { q: "Which medication?", opts: [
+            {l:"Adderall / Vyvanse / Ritalin",v:"stim",n:"verdictProhibited"},{l:"Sudafed / Vicks Inhaler",v:"pseudo",n:"verdictProhibited"},{l:"Codeine / Xanax / Valium",v:"control",n:"verdictRestricted"},{l:"Warfarin / Eliquis",v:"anticoag",n:"interactionAsk"},{l:"Other — type below",v:"other",n:"otherMed"}]},
+          interactionAsk: { q: "Do you have a new prescription you need to check against?", opts: [
+            {l:"Yes — Ciprofloxacin",v:"cipro",n:"verdictInteraction"},{l:"Yes — other antibiotic",v:"abx",n:"verdictInteraction"},{l:"No — just checking",v:"no",n:"verdictSafe"}]},
+          otherMed: { q: "Type the medication name below and I'll check it.", opts: [
+            {l:"⏭️ Skip — just check general safety",v:"skip",n:"verdictSafe"}]},
+          verdictProhibited: { verdict: { level:null, route:"drug-prohibited", title:"⛔ PROHIBITED — Do NOT Bring", summary:"This medication is classified as a controlled substance in Japan. Carrying it → arrest.", confidence:"This is absolute — Japan has zero tolerance.", action:"Do not bring. Contact embassy." }},
+          verdictRestricted: { verdict: { level:null, route:"drug-restricted", title:"⚠️ RESTRICTED — Permit Required", summary:"You can bring this with a Yunyu Kakunin-sho import certificate.", confidence:"Importable with paperwork.", action:"Apply 2+ weeks before travel" }},
+          verdictInteraction: { verdict: { level:null, route:"drug-interaction", title:"⚠️ CRITICAL Interaction Detected", summary:"This combination increases bleeding risk. Your INR must be monitored.", confidence:"Well-documented interaction.", action:"Alert your doctor before taking" }},
+          verdictSafe: { verdict: { level:null, route:"cost-info", title:"✅ No Issues Detected", summary:"This medication is legal to bring to Japan with a prescription.", confidence:"Based on MHLW guidelines.", action:"Carry original packaging + prescription" }},
+        }
+      },
+      "altitude": {
+        start: "symptomsAlt",
+        nodes: {
+          symptomsAlt: { q: "What are you feeling?", opts: [
+            {l:"Severe headache + confusion",v:"severe",n:"verdictSev1_hace"},{l:"Shortness of breath at rest",v:"sob",n:"verdictSev1_hape"},{l:"Headache + nausea + fatigue",v:"ams",n:"verdictSev2_ams"},{l:"Mild headache / tired",v:"mild",n:"verdictSev4"}]},
+          verdictSev1_hace: { verdict: { level:1, route:"head-injury", title:"🚨 Possible HACE (Brain Swelling)", summary:"Severe headache + confusion at altitude is a life-threatening emergency.", confidence:"This is altitude sickness at its most dangerous.", action:"CALL 119 — descend immediately" }},
+          verdictSev1_hape: { verdict: { level:1, route:"chest-pain", title:"🚨 Possible HAPE (Lung Fluid)", summary:"Shortness of breath at rest at altitude is a medical emergency.", confidence:"Life-threatening — act now.", action:"CALL 119 — descend immediately" }},
+          verdictSev2_ams: { verdict: { level:2, route:"moderate-fever", title:"⚠️ Acute Mountain Sickness", summary:"Headache + nausea at altitude — you need to descend and get oxygen.", confidence:"AMS can worsen quickly.", action:"Descend. Find medical help." }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild Altitude Symptoms", summary:"Rest, hydrate, don't ascend further. Descend if worsens.", confidence:"Common at altitude — monitor.", action:"Rest. Descend if symptoms increase." }},
+        }
+      },
+      "general": {
+        start: "describe",
+        nodes: {
+          describe: { q: "Can you describe what you're feeling in a few words?", opts: [
+            {l:"Pain",v:"pain",n:"painAsk"},{l:"Feeling sick / unwell",v:"sick",n:"verdictSev3"},{l:"Something else",v:"other",n:"verdictSev3"}]},
+          painAsk: { q: "Where?", opts: [
+            {l:"Head",v:"head",n:"verdictSev3"},{l:"Chest",v:"chest",n:"verdictSev2"},{l:"Stomach",v:"stomach",n:"verdictSev3"},{l:"Limbs / back",v:"limb",n:"verdictSev4"}]},
+          verdictSev2: { verdict: { level:2, route:"chest-pain", title:"⚠️ Needs Evaluation", summary:"Your symptoms could indicate several conditions — better to be seen.", confidence:"I'd like a doctor to evaluate this.", action:"Go to ER or clinic" }},
+          verdictSev3: { verdict: { level:3, route:"mild-symptoms", title:"🏥 Get Checked", summary:"Your symptoms should be evaluated within 24 hours.", confidence:"Better to be safe.", action:"Find a clinic" }},
+          verdictSev4: { verdict: { level:4, route:"mild-symptoms", title:"ℹ️ Mild — Monitor", summary:"Rest, hydrate, monitor.", confidence:"Low concern currently.", action:"Self-care. Return if worsens." }},
+        }
+      },
+    };
+
+    function detectSymptomCategory(text) {
+      const t = text.toLowerCase();
+      if (/chest pain|chest hurt|heart|shortness of breath|can't breathe/i.test(t)) return "chest-pain";
+      if (/fever|temperature|hot|chills|flu|cough/i.test(t)) return "fever";
+      if (/headache|migraine|head hurt|head pain/i.test(t)) return "headache";
+      if (/stomach|abdominal|diarrhea|vomiting|nausea|food poison/i.test(t)) return /food poison|vomit|diarrhea/i.test(t) ? "food-poisoning" : "abdominal";
+      if (/fell|sprain|twist|fracture|break|injur|hurt my|cut|burn|wound/i.test(t)) return "injury";
+      if (/allerg|hives|swelling|sting|bite|rash|anaphylaxis/i.test(t)) return "allergy";
+      if (/altitude|fuji|mountain|climb|hike/i.test(t)) return "altitude";
+      if (/adderall|vyvanse|ritalin|concerta|sudafed|vicks|codeine|xanax|valium|warfarin|metformin|eliquis|medication|drug|pill|prescription/i.test(t)) return "medication";
+      return "general";
+    }
+
+    const ROUTES = {
+      "chest-pain":      { category:"emergency", label:"Chest Pain Emergency",    screens:["chat","triageEmergency","call119","wait","endEmergency"], ctx:{urgencyLevel:1,severityColor:"error",specialty:"emergency",clinics:clinics.emergency,patientName:"Alex Chen",currentMeds:["Warfarin"]}},
+      "bleeding":        { category:"emergency", label:"Severe Bleeding",         screens:["chat","triageEmergency","call119","wait","endEmergency"], ctx:{urgencyLevel:1,severityColor:"error",specialty:"surgery",clinics:clinics.emergency,patientName:"Alex Chen"}},
+      "head-injury":     { category:"emergency", label:"Head Injury",             screens:["chat","triageEmergency","call119","wait","endEmergency"], ctx:{urgencyLevel:1,severityColor:"error",specialty:"neurology",clinics:clinics.emergency,patientName:"Alex Chen"}},
+      "child-emergency": { category:"emergency", label:"Child Emergency",         screens:["chat","triageUrgent","call119","wait","endEmergency"], ctx:{urgencyLevel:2,severityColor:"warning",specialty:"pediatrics",clinics:clinics.pediatric,patientName:"Alex Chen"}},
+      "moderate-fever":  { category:"clinic", label:"Moderate Fever / Flu",      screens:["chat","triageUrgent","costEducation","insuranceInput","clinicSearch","booking","bookingConfirmed","arrival","intake","liveTranslation","commonPhrases","endTranslation","prescriptionTransition","prescriptionUpload","pharmacyMatch","pickupReady","drugInteraction","liveTranslation","receipt","endTranslation"], ctx:{urgencyLevel:3,severityColor:"warning",specialty:"internal",clinics:clinics.internal,patientName:"Alex Chen",currentMeds:["Warfarin"]}},
+      "mild-symptoms":   { category:"clinic", label:"Mild Symptoms",              screens:["chat","triageMild","selfCare","clinicSearch","booking","bookingConfirmed","arrival","intake","liveTranslation","receipt","claimGenerated","endClinic"], ctx:{urgencyLevel:4,severityColor:"primary",specialty:"internal",clinics:clinics.internal,patientName:"Alex Chen"}},
+      "injury":          { category:"clinic", label:"Non-Emergency Injury",       screens:["chat","triageUrgent","costEducation","insuranceInput","clinicSearch","booking","bookingConfirmed","arrival","intake","liveTranslation","commonPhrases","endTranslation","liveTranslation","receipt","endTranslation"], ctx:{urgencyLevel:3,severityColor:"warning",specialty:"orthopedics",clinics:clinics.orthopedics,patientName:"Alex Chen"}},
+      "dental":          { category:"clinic", label:"Dental Emergency",           screens:["chat","triageUrgent","costEducation","insuranceInput","clinicSearch","booking","bookingConfirmed","arrival","intake","liveTranslation","commonPhrases","endTranslation","liveTranslation","receipt","endTranslation"], ctx:{urgencyLevel:3,severityColor:"warning",specialty:"dental",clinics:clinics.dental,patientName:"Alex Chen"}},
+      "get-prescription": { category:"medication", label:"Get a Prescription in Japan", screens:["howToGetRx","clinicDetail","showRx","pharmacistTranslate","endMedication"], ctx:{urgencyLevel:null,severityColor:"primary",specialty:"internal",clinics:clinics.internal,patientName:"Alex Chen"}},
+      "drug-interaction":  { category:"medication", label:"Drug Interaction Check", screens:["drugInteractionInput","drugInteraction","pharmacistTranslate","endMedication"], ctx:{urgencyLevel:null,severityColor:"warning",currentMeds:["Warfarin"],newPrescription:"Ciprofloxacin"}},
+      "lost-medication":   { category:"medication", label:"Lost Medication",        screens:["pharmacyFinder","prescriptionRequest","booking","bookingConfirmed","endMedication"], ctx:{urgencyLevel:3,severityColor:"warning",specialty:"pharmacy",clinics:clinics.pharmacy,patientName:"Alex Chen"}},
+      "pre-travel-check":  { category:"medication", label:"Pre-Travel Medication Check", screens:["preTravelInput","preTravelResult","endMedication"], ctx:{urgencyLevel:null,severityColor:"primary"}},
+      "pharmacy-translate":{ category:"translation", label:"Pharmacy Translation",  screens:["liveTranslation","receipt","endTranslation"], ctx:{urgencyLevel:5,severityColor:"primary"}},
+      "doctor-translate":  { category:"translation", label:"Live Translation",      screens:["liveTranslation","commonPhrases","endTranslation"], ctx:{urgencyLevel:null,severityColor:"primary"}},
+      "cost-info":         { category:"cost", label:"Cost & Insurance",             screens:["costEducation","insuranceInput","insuranceExplainer","receiptPreview","visaWaming","endCost"], ctx:{urgencyLevel:null,severityColor:"primary"}},
+    };
+
+    const CATEGORIES = [
+      { id:"emergency",  icon:"🚨", label:"Emergency",     count:4, color:"var(--error)",   routeOrder:["chest-pain","bleeding","head-injury","child-emergency"]},
+      { id:"clinic",     icon:"🏥", label:"Clinic Visit",  count:4, color:"var(--warning)", routeOrder:["moderate-fever","mild-symptoms","injury","dental"]},
+      { id:"medication", icon:"💊", label:"Medication",    count:4, color:"#9334E6",        routeOrder:["get-prescription","drug-interaction","lost-medication","pre-travel-check"]},
+      { id:"translation",icon:"🗣️", label:"Translation",  count:2, color:"#00897B",        routeOrder:["pharmacy-translate","doctor-translate"]},
+      { id:"cost",       icon:"💰", label:"Cost & Claims", count:1, color:"var(--primary)", routeOrder:["cost-info"]},
+    ];
+
+    // ══════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════
+    let sessionState = {
+      currentRoute: null, currentStep: 0, visitedSteps: new Set(),
+      pathContext: {}, pastRoutes: [], activeHubCategory: null,
+      lang: "en", isTransitioning: false, romajiVisible: false,
+      chatEngine: { tree: null, currentNode: null, history: [], verdict: null, severityBump: 0, detectedMeds: [] },
+    };
+
+    function saveState() {
+      localStorage.setItem("mediroute-session", JSON.stringify({
+        currentRoute: sessionState.currentRoute,
+        currentStep: sessionState.currentStep,
+        visitedSteps: [...sessionState.visitedSteps],
+        pathContext: sessionState.pathContext,
+        pastRoutes: sessionState.pastRoutes.slice(-5),
+        lang: sessionState.lang,
+        timestamp: Date.now(),
+      }));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem("mediroute-session");
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (Date.now() - data.timestamp > 86400000) { localStorage.removeItem("mediroute-session"); return false; }
+        sessionState.currentRoute = data.currentRoute;
+        sessionState.currentStep = data.currentStep;
+        sessionState.visitedSteps = new Set(data.visitedSteps || []);
+        sessionState.pathContext = data.pathContext || {};
+        sessionState.pastRoutes = data.pastRoutes || [];
+        sessionState.lang = data.lang || "en";
+        return data.currentRoute !== null;
+      } catch (e) { return false; }
+    }
+
+    function clearState() {
+      localStorage.removeItem("mediroute-session");
+      sessionState = { currentRoute:null, currentStep:0, visitedSteps:new Set(), pathContext:{}, pastRoutes:[], activeHubCategory:null, lang:"en", isTransitioning:false, romajiVisible:false, chatEngine:{ tree:null, currentNode:null, history:[], verdict:null, severityBump:0, detectedMeds:[] } };
+    }
+
+    function currentRouteData() { return ROUTES[sessionState.currentRoute]; }
+    function currentScreenId() { const r = currentRouteData(); return r ? r.screens[sessionState.currentStep] : null; }
+    function totalSteps() { const r = currentRouteData(); return r ? r.screens.length : 0; }
+
+    // ══════════════════════════════════════════
+    // SCREEN TEMPLATES
+    // ══════════════════════════════════════════
+    const T = (ctx = {}) => sessionState.pathContext || ctx;
+
+    const SCREEN_TEMPLATES = {
+      chat: () => {
+        const ce = sessionState.chatEngine;
+        let msgs = '';
+        for (const h of ce.history) {
+          if (h.role === 'user') {
+            msgs += '<div class="chat-bubble chat-bubble-user"><p>' + h.text + '</p><span class="chat-time">' + (h.time||'') + '</span></div>';
+          } else {
+            msgs += '<div class="chat-bubble chat-bubble-assistant"><p>' + h.text + '</p></div>';
+            if (h.options) {
+              msgs += '<div class="chat-options">' + h.options.map(function(o,i) { return '<button class="chat-option" data-idx="' + i + '">' + o.l + '</button>'; }).join('') + '<button class="chat-option chat-option-type" id="typeInstead">Type instead</button></div>';
+            }
+          }
+        }
+        let verdictHTML = '';
+        if (ce.verdict) {
+          var v = ce.verdict;
+          var color = v.level === 1 ? 'var(--error)' : v.level === 2 ? 'var(--warning)' : v.level === 3 ? 'var(--warning)' : 'var(--primary)';
+          verdictHTML = '<div class="verdict-card" style="border-color:' + color + ';"><div class="verdict-header">' + v.title + '</div><p>' + v.summary + '</p><div class="verdict-confidence">' + v.confidence + '</div><div class="verdict-action" style="background:' + color + ';">' + v.action + '</div><button class="btn-primary" id="verdictContinue" style="margin-top:8px;">Continue</button></div>';
+        }
+        var typingHTML = ce.verdict ? '' : '<div class="chat-bubble chat-bubble-assistant" id="typingIndicator"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+        var placeholder = ce.currentNode ? 'Tap an option or type your answer...' : 'Describe your symptoms...';
+        return '<div class="screen screen-chat"><div class="chat-header">MediRoute</div><div class="chat-messages" id="chatMessages">' + msgs + verdictHTML + typingHTML + '</div><div class="chat-input-bar" id="chatInputBar"><input type="text" id="chatInput" placeholder="' + placeholder + '" autofocus><button id="chatSend"><i class="ph ph-paper-plane-tilt"></i></button></div></div>';
+      },
+
+      triageEmergency: (ctx) => `
+        <div class="screen screen-triage">
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>I've analyzed your symptoms. This requires immediate attention.</p></div>
+          <div class="severity-card">
+            <div class="severity-badge">🚨 Severity ${ctx.urgencyLevel} — Emergency</div>
+            <h2>CALL 119 IMMEDIATELY</h2>
+            <p class="severity-reasoning">Chest pain + difficulty breathing requires immediate emergency care</p>
+            <div class="route-label">Route A: Call 119 now</div>
+            <button class="btn-119 pulsing" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-phone-call"></i> CALL 119</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>Ambulances in Japan are 100% FREE — don't hesitate to call.</span></div>
+          </div>
+        </div>`,
+
+      call119: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="emergency-call-header">
+            <div class="ec-status" id="ecStatus">📞 Calling 119...</div>
+            <div class="ec-timer" id="ecTimer">00:03</div>
+          </div>
+          <div class="ec-progress">
+            <div class="ec-step active" id="ecs1">📞 Dialing emergency services...</div>
+            <div class="ec-step" id="ecs2">🔗 Connected to operator</div>
+            <div class="ec-step" id="ecs3">📋 Sharing your location</div>
+            <div class="ec-step" id="ecs4">🚑 Ambulance dispatched</div>
+          </div>
+          <div class="ec-instructions" id="ecInstructions" style="display:none;">
+            <div style="text-align:center;padding:12px;">
+              <div style="font-size:36px;">🚑</div>
+              <h3 style="font-family:var(--font-display);font-size:16px;margin:8px 0;">Ambulance is on the way</h3>
+              <p style="font-size:12px;color:var(--on-surface-variant);">ETA: ~7 minutes</p>
+            </div>
+            <div class="info-grid" style="grid-template-columns:1fr;">
+              <div class="info-card" style="border-left:3px solid var(--error);"><h4>🧍 Wait outside</h4><p>Go to the street / lobby. Make yourself visible. Wave if you see the ambulance.</p></div>
+              <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 Have ready</h4><p>Passport, insurance card, list of medications you take.</p></div>
+              <div class="info-card" style="border-left:3px solid var(--warning);"><h4>🔔 Stay on the line</h4><p>The operator may stay on the phone with you. Don't hang up.</p></div>
+            </div>
+          </div>
+          <div class="translate-mini" id="ecTranslate" style="display:none;">
+            <div class="translate-mini-header"><i class="ph ph-translate"></i> Talk to 119 Operator</div>
+            <div class="lt-mic-area"><div class="lt-mic-btn pulsing" onclick="showToast('🎤 Listening...')"><i class="ph ph-microphone"></i></div><p class="lt-mic-hint">Tap to speak to operator</p></div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 救急車をお願いします')"><span>I need an ambulance</span><i class="ph ph-speaker-high"></i></div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 救急車をお願いします')"><span>救急車をお願いします</span><i class="ph ph-speaker-high"></i></div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 胸が痛いです。息が苦しいです。')"><span>I have chest pain. Can't breathe.</span><i class="ph ph-speaker-high"></i></div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 胸が痛いです。息が苦しいです。')"><span>胸が痛いです。息が苦しいです。</span><i class="ph ph-speaker-high"></i></div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 私は〇〇にいます。')"><span>I'm at [hotel/address]</span><i class="ph ph-speaker-high"></i></div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 私は〇〇にいます。')"><span>私は〇〇にいます。</span><i class="ph ph-speaker-high"></i></div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 外国人です。日本語は話せません。')"><span>I'm a foreigner. No Japanese.</span><i class="ph ph-speaker-high"></i></div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 外国人です。日本語は話せません。')"><span>外国人です。日本語は話せません。</span><i class="ph ph-speaker-high"></i></div>
+            </div>
+          </div>
+        </div>`,
+
+      triageUrgent: (ctx) => `
+        <div class="screen screen-triage">
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>I've analyzed your symptoms. This needs attention but is not life-threatening.</p></div>
+          <div class="severity-card" style="border-color:var(--warning);">
+            <div class="severity-badge" style="background:var(--warning);color:#202124;">⚠️ Severity ${ctx.urgencyLevel} — Urgent</div>
+            <h2 style="color:var(--warning);">Find a Clinic Today</h2>
+            <p class="severity-reasoning">Your symptoms require medical attention within 24 hours</p>
+            <div class="route-label" style="background:#FFF8E1;color:#B06000;">Route B: Clinic today</div>
+            <button class="btn-primary" style="margin:12px 0;" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-hospital"></i> Find Nearby Clinic</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>Clinic visit: ¥5,000–¥15,000 (~$35–$105). Insurance reimburses you.</span></div>
+          </div>
+        </div>`,
+
+      triageMild: (ctx) => {
+        const summary = ctx.chatSummary || '';
+        return `
+        <div class="screen screen-triage">
+          ${summary ? `<div class="chat-history-summary"><span>You told us:</span> ${summary}</div>` : ''}
+          <div class="chat-bubble chat-bubble-assistant" style="margin-bottom:16px;"><p>Your symptoms appear mild. No emergency — but let's keep an eye on it.</p></div>
+          <div class="severity-card" style="border-color:var(--primary);">
+            <div class="severity-badge" style="background:var(--primary);">ℹ️ Severity ${ctx.urgencyLevel} — Semi-Urgent</div>
+            <h2 style="color:var(--primary);">Monitor for 48 Hours</h2>
+            <p class="severity-reasoning">Your symptoms can likely be managed with self-care</p>
+            <div class="route-label" style="background:#E8F0FE;color:var(--primary);">Route C: Clinic within 48h</div>
+            <button class="btn-primary" style="margin:8px 0;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-hospital"></i> Self-Care Tips</button>
+            <button class="btn-primary" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-first-aid"></i> Find a Clinic</button>
+            <div class="cost-reassurance"><i class="ph ph-check-circle" style="color:#34A853;"></i><span>If symptoms worsen, come back. Clinic visit: ~$35–$105.</span></div>
+          </div>
+        </div>`;
+      },
+
+      endEmergency: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:20px 0;">
+            <div style="font-size:48px;">🏥</div>
+            <h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You're in good hands</h2>
+            <p style="font-size:13px;color:var(--on-surface-variant);">The ambulance will take you to the nearest emergency hospital. The medical team is prepared.</p>
+          </div>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 At the hospital</h4><p>Show your passport and insurance card at reception. Emergency transport skips the walk-in penalty.</p></div>
+            <div class="info-card" style="border-left:3px solid #34A853;"><h4>💰 After treatment</h4><p>Come back to MediRoute to scan your receipt and generate your insurance claim.</p></div>
+          </div>
+          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      wait: () => `
+          <p class="screen-subtitle">Here's what you need to know while you wait for the ambulance.</p>
+          <div class="info-grid">
+            <div class="info-card"><i class="ph ph-ambulance"></i><h4>Ambulances are FREE</h4><p>¥0 for everyone, including tourists. Source: FDMA</p></div>
+            <div class="info-card"><i class="ph ph-identification-badge"></i><h4>At the hospital</h4><p>Show your passport and insurance card. Emergency transport skips the ¥7,000–¥11,000 walk-in penalty.</p></div>
+            <div class="info-card"><i class="ph ph-translate"></i><h4>Language support</h4><p>Most ERs have interpreter tablets. Ask for "tsuyaku" (通訳).</p></div>
+            <div class="info-card"><i class="ph ph-warning-circle"></i><h4>Don't skip the bill</h4><p>Unpaid bills ≥¥10,000 → visa denial on re-entry. Always pay before leaving.</p></div>
+          </div>
+        </div>`,
+
+      costEducation: () => `
+        <div class="screen screen-info">
+          <div class="screen-header">💰 Your Coverage</div>
+          <p class="screen-subtitle" id="coverageSubtitle">Based on your insurance: <strong>Not verified yet</strong></p>
+          <div class="info-grid" id="costCards">
+            <div class="info-card cost-card"><i class="ph ph-ambulance"></i><h4>Ambulance</h4><p>¥0 — always free</p><p class="cost-status" style="color:#137333;">✅ Free for everyone</p></div>
+            <div class="info-card cost-card"><i class="ph ph-hospital"></i><h4>Clinic Visit</h4><p class="cost-amount">¥5,000–¥15,000</p><p class="cost-status" id="csClinic">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-currency-circle-dollar"></i><h4>ER Visit</h4><p class="cost-amount">¥36,000–¥59,000</p><p class="cost-status" id="csER">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-warning-circle"></i><h4>Walk-in Penalty</h4><p class="cost-amount">¥7,000–¥11,000</p><p class="cost-status" id="csPenalty">—</p></div>
+            <div class="info-card cost-card"><i class="ph ph-pill"></i><h4>Prescriptions</h4><p class="cost-amount">¥1,000–¥5,000</p><p class="cost-status" id="csRx">—</p></div>
+          </div>
+          <button class="btn-primary" style="margin-top:8px;" id="btnAddInsurance"><i class="ph ph-shield-check"></i> Add Insurance Details</button>
+          <button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Continue</button>
+          <button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      insuranceInput: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">🛡️ Travel Insurance</div>
+          <p class="screen-subtitle">Tell us your insurance so we can predict your costs</p>
+          <div class="ins-form">
+            <div class="ins-field">
+              <label class="ins-label">Insurance Provider</label>
+              <select id="insProvider" class="ins-select">
+                <option value="">Select your provider...</option>
+                <option value="allianz">Allianz Travel</option>
+                <option value="sompo">Sompo Japan</option>
+                <option value="nomads">World Nomads</option>
+                <option value="axa">AXA Travel</option>
+                <option value="other">Other provider</option>
+                <option value="none">❌ I don't have insurance</option>
+              </select>
+            </div>
+            <div class="ins-field" id="policyField" style="display:none;">
+              <label class="ins-label">Policy Number</label>
+              <input type="text" id="insPolicy" class="ins-input" placeholder="e.g. POL-88215623">
+            </div>
+            <div class="ins-field" id="coverageField" style="display:none;">
+              <label class="ins-label">Coverage Type</label>
+              <select id="insCoverage" class="ins-select">
+                <option value="comprehensive">Comprehensive (medical + trip)</option>
+                <option value="medical">Medical only</option>
+                <option value="basic">Basic / Emergency only</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" id="btnVerifyIns"><i class="ph ph-shield-check"></i> Verify & Apply</button>
+          <div class="ins-result" id="insResult" style="display:none;">
+            <div class="ins-result-header" id="insResultHeader"></div>
+            <div class="ins-coverage-list" id="insCoverageList"></div>
+          </div>
+        </div>`,
+
+      clinicSearch: (ctx) => {
+        const list = ctx.clinics || [];
+        const accent = ctx.severityColor === "error" ? "var(--error)" : ctx.severityColor === "warning" ? "var(--warning)" : "var(--primary)";
+        const sel = sessionState.pathContext.selectedClinic;
+        return `
+        <div class="screen screen-clinics">
+          <div class="screen-header">Nearby ${ctx.specialty ? ctx.specialty.charAt(0).toUpperCase()+ctx.specialty.slice(1) : "Medical"} Facilities</div>
+          <div class="map-mock"><div class="map-grid"></div><div class="map-pin" style="background:${accent};"></div><span class="map-label">Google Maps Grounding — Shinjuku area</span></div>
+          <div class="clinic-list">
+            ${list.map((c, i) => {
+              const isSel = sel ? sel.name === c.name : i === 0;
+              return `<div class="clinic-card${isSel?' selected':''}" data-clinic-index="${i}" style="${isSel?'border-color:'+accent+';background:#F0F6FF;':''}">
+                <div class="clinic-card-top">
+                  <div><h4>${c.name}</h4><span class="badge ${ctx.urgencyLevel&&ctx.urgencyLevel<=2?'badge-emergency':'badge-internal'}">${c.specialty}</span><span class="badge badge-lang">${c.language}</span></div>
+                  ${isSel ? '<i class="ph ph-check-circle" style="font-size:24px;color:'+accent+';"></i>' : '<button class="btn-select" data-clinic-index="'+i+'">Select</button>'}
+                </div>
+                <div class="clinic-meta"><span><i class="ph ph-map-pin"></i> ${c.distance}</span><span><i class="ph ph-clock"></i> ${c.hours}</span></div>
+              </div>`;
+            }).join('')}
+          </div>
+          <p class="citation">Source: Google Maps Grounding</p>
+          <button class="btn-primary" style="margin-top:8px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Next: Booking</button>
+        </div>`;
+      },
+
+      booking: (ctx) => {
+        const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "St. Luke's International Hospital", phone: "03-5550-7120" };
+        const details = ctx.symptomDetails || [];
+        const summary = ctx.chatSummary || ctx.chiefComplaint || 'Feeling unwell';
+        // Build contextual Japanese script from symptoms
+        let jpSymptoms = '';
+        if (details.length > 0) {
+          const keywords = details.join(' ').toLowerCase();
+          if (/fever|temperature|39|38|hot/i.test(keywords)) jpSymptoms += '熱が39度あります。';
+          if (/cough/i.test(keywords)) jpSymptoms += '咳が出ます。';
+          if (/ache|pain|hurt/i.test(keywords)) jpSymptoms += '体が痛みます。';
+          if (/nausea|vomit|stomach/i.test(keywords)) jpSymptoms += '吐き気がします。';
+          if (/headache|head/i.test(keywords)) jpSymptoms += '頭痛があります。';
+          if (/diarrhea/i.test(keywords)) jpSymptoms += '下痢があります。';
+          if (!jpSymptoms) jpSymptoms = '体調が悪いです。';
+        } else {
+          jpSymptoms = '体調が悪いです。';
+        }
+        // Duration
+        let duration = '';
+        if (details.length > 0) {
+          const dText = details.join(' ');
+          if (/day|3 day|2 day/i.test(dText)) duration = '2日間続いています。';
+          else if (/hour|30 min|1 day/i.test(dText)) duration = '昨日から続いています。';
+          else duration = '今日からです。';
+        }
+        return `
+        <div class="screen screen-script">
+          <div class="screen-header">${clinic.name}</div>
+          <div class="phone-call-bar">
+            <span class="phone-number">📞 ${clinic.phone}</span>
+            <button class="btn-call" id="btnCallClinic"><i class="ph ph-phone-call"></i> Call to Book</button>
+          </div>
+          <div class="booking-status" id="bookingStatus" style="display:none;">
+            <div class="booking-progress">
+              <div class="booking-step active">📞 Calling...</div>
+              <div class="booking-step" id="bs2">🗣️ Speaking...</div>
+              <div class="booking-step" id="bs3">✅ Booked!</div>
+            </div>
+          </div>
+          <div class="script-card">
+            <div class="script-lang-label">🇯🇵 Japanese — show this or read aloud</div>
+            <p class="script-text-jp">こんにちは。${jpSymptoms}${duration}外国人です。日本語は話せません。診察をお願いします。</p>
+            <div class="script-toggle" id="romajiToggle"><i class="ph ph-eye"></i> Show Romaji</div>
+            <p class="script-text-romaji" id="romajiText" style="display:none;">Konnichiwa. ${jpSymptoms.replace(/[。]/g,'. ')}${duration}Gaikokujin desu. Nihongo wa hanasemasen. Shinsatsu wo onegai shimasu.</p>
+            <div class="script-divider"></div>
+            <p class="script-text-en">Hello. ${jpSymptoms.replace(/[。]/g,'. ')}${duration}I'm a foreigner. I don't speak Japanese. I'd like to see a doctor, please.</p>
+          </div>
+          <div class="symptom-confirm">
+            <div class="confirm-label">📋 Confirmed symptoms from your chat:</div>
+            <div class="confirm-detail">${summary}</div>
+          </div>
+          <p class="script-tip">💡 Screen brightness up — make it easy for the receptionist to read</p>
+        </div>`;
+      },
+
+      arrival: (ctx) => {
+        const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "the hospital" };
+        return `<div class="screen screen-transition"><div class="transition-icon">🏥</div><h2>You've arrived at ${clinic.name}</h2><p>The receptionist hands you a 問診票 (medical questionnaire).<br>MediRoute has pre-filled it for you.</p></div>`;
+      },
+
+      bookingConfirmed: (ctx) => {
+        const clinic = sessionState.pathContext.selectedClinic || (ctx.clinics && ctx.clinics[0]) || { name: "Tokyo Midtown Medical", phone: "03-5413-0080", distance: "2.1km", hours: "9:00-21:00", language: "🇬🇧 English available", specialty: "Internal Medicine" };
+        return `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:8px 0;">
+            <div style="font-size:32px;margin-bottom:4px;">✅</div>
+            <div class="screen-header">Booking Confirmed</div>
+            <p class="screen-subtitle">${clinic.name}</p>
+          </div>
+          <div class="clinic-detail-card">
+            <div class="clinic-detail-row"><i class="ph ph-hospital"></i><div><span class="detail-label">Clinic</span><span class="detail-value">${clinic.name}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-stethoscope"></i><div><span class="detail-label">Specialty</span><span class="detail-value">${clinic.specialty||'Internal Medicine'}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-phone-call"></i><div><span class="detail-label">Phone</span><span class="detail-value">${clinic.phone}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Hours</span><span class="detail-value">${clinic.hours}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-globe"></i><div><span class="detail-label">Language</span><span class="detail-value">${clinic.language}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-map-pin"></i><div><span class="detail-label">Distance</span><span class="detail-value">${clinic.distance} — ~${clinic.distance==='0.8km'?'10 min walk':'5 min taxi'}</span></div></div>
+          </div>
+          <div class="route-map">
+            <div class="route-start">📍 You are here</div>
+            <div class="route-line"></div>
+            <div class="route-end">🏥 ${clinic.name}</div>
+          </div>
+          <button class="btn-primary" onclick="showToast('🗺️ Opening Google Maps...')"><i class="ph ph-map-pin"></i> Get Directions</button>
+          <div class="booking-tips">
+            <p><strong>📋 What to bring:</strong> Passport, insurance card, cash/credit card</p>
+            <p><strong>💡 Tip:</strong> Arrive 10 min early for first-time patient registration</p>
+          </div>
+        </div>`;
+      },
+
+      intake: (ctx) => {
+        const summary = ctx.chatSummary || '';
+        // Translate symptoms to Japanese for the Japanese column
+        let jpSymptoms = '体調不良';
+        if (summary) {
+          const parts = [];
+          const s = summary.toLowerCase();
+          if (/fever|39|38|temperature|hot/i.test(s)) parts.push('発熱（38-39℃）');
+          if (/cough/i.test(s)) parts.push('咳');
+          if (/sore throat/i.test(s)) parts.push('喉の痛み');
+          if (/body ache|pain|hurt/i.test(s)) parts.push('体の痛み');
+          if (/headache|head/i.test(s)) parts.push('頭痛');
+          if (/nausea|vomit/i.test(s)) parts.push('吐き気');
+          if (/diarrhea/i.test(s)) parts.push('下痢');
+          if (/chest pain/i.test(s)) parts.push('胸の痛み');
+          if (/shortness of breath|breathing/i.test(s)) parts.push('息切れ');
+          if (/dizzy|dizziness/i.test(s)) parts.push('めまい');
+          if (parts.length > 0) jpSymptoms = parts.join('、');
+        }
+        // Translate medications to Japanese
+        const meds = ctx.currentMeds || [];
+        const jpMeds = meds.map(m => {
+          if (/warfarin/i.test(m)) return 'ワルファリン';
+          if (/metformin/i.test(m)) return 'メトホルミン';
+          if (/eliquis/i.test(m)) return 'エリキュース';
+          return m;
+        });
+        return `
+        <div class="screen screen-form" id="intakeScreen">
+          <div class="screen-header">📋 問診票 — Medical Questionnaire</div>
+          <div class="intake-actions">
+            <button class="btn-scan" id="btnScanForm"><i class="ph ph-camera"></i> 📸 Snap & Translate Form</button>
+          </div>
+          <div class="intake-form-card" id="intakeFormCard">
+            <div class="intake-row intake-row-header"><div class="intake-col-jp">日本語</div><div class="intake-col-en">English</div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">名前</span><span class="field-value">アレックス・チェン</span></div><div class="intake-col-en"><span class="field-label">Name</span><span class="field-value">${ctx.patientName||'Alex Chen'}</span></div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">生年月日</span><span class="field-value">1992年3月15日</span></div><div class="intake-col-en"><span class="field-label">Date of Birth</span><span class="field-value">1992-03-15</span></div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">症状</span><span class="field-value">${jpSymptoms}</span></div><div class="intake-col-en"><span class="field-label">Symptoms</span><span class="field-value">${summary||'Feeling unwell'}</span></div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">既往歴</span><span class="field-value">なし</span></div><div class="intake-col-en"><span class="field-label">Medical History</span><span class="field-value">None</span></div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">服用中の薬</span><span class="field-value">${jpMeds.length>0?jpMeds.join('、'):'なし'}</span></div><div class="intake-col-en"><span class="field-label">Current Medications</span><span class="field-value">${meds.length>0?meds.join(', '):'None'}</span></div></div>
+            <div class="intake-row"><div class="intake-col-jp"><span class="field-label">アレルギー</span><span class="field-value">なし</span></div><div class="intake-col-en"><span class="field-label">Allergies</span><span class="field-value">None</span></div></div>
+          </div>
+          <div class="scan-overlay" id="scanOverlay" style="display:none;">
+            <div class="scan-viewfinder">
+              <div class="scan-corners"></div>
+              <p class="scan-text" id="scanText">📸 Point camera at the Japanese form...</p>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="showToast('✅ PDF saved — show at reception')"><i class="ph ph-file-pdf"></i> Download PDF</button>
+          <button class="btn-primary" id="btnStartTranslate" style="background:var(--surface);color:var(--primary);border:1px solid var(--primary);margin-top:4px;"><i class="ph ph-translate"></i> Start Live Translation with Doctor</button>
+          <p class="form-tip">💡 Hand the Japanese column to the doctor. Then use live translate to communicate.</p>
+        </div>`;
+      },
+
+      prescriptionTransition: (ctx) => `
+        <div class="screen screen-transition">
+          <div class="transition-icon">💊</div>
+          <h2>The doctor prescribed ${ctx.newPrescription||'medication'}</h2>
+          <p>Snap a photo of your prescription and we'll send it to a nearby pharmacy for pickup.</p>
+        </div>`,
+
+      prescriptionUpload: (ctx) => {
+        const drug = ctx.newPrescription || 'Ciprofloxacin';
+        return `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">📸 Upload Prescription</div>
+          <p class="screen-subtitle">Snap a photo of the prescription from your doctor</p>
+          <div class="rx-camera" id="rxCamera">
+            <div class="rx-viewfinder">
+              <div class="rx-corners"></div>
+              <p class="rx-hint">📄 Position prescription in frame</p>
+            </div>
+          </div>
+          <button class="btn-primary" id="btnSnapRx"><i class="ph ph-camera"></i> Capture Prescription</button>
+          <div class="rx-result" id="rxResult" style="display:none;">
+            <div class="rx-drug-card">
+              <div class="rx-drug-icon">💊</div>
+              <div class="rx-drug-info">
+                <div class="rx-drug-name">${drug}</div>
+                <div class="rx-drug-detail">500mg · 2x daily · 7 days</div>
+                <div class="rx-drug-detail">Prescribed by: Dr. Tanaka</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      },
+
+      pharmacyMatch: (ctx) => {
+        const drug = ctx.newPrescription || 'Ciprofloxacin';
+        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: '🇬🇧 Some English' };
+        return `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">🔍 Finding Pharmacy...</div>
+          <div class="pharmacy-progress" id="pharmacyProgress">
+            <div class="pharmacy-step active" id="ps1">📤 Sending prescription...</div>
+            <div class="pharmacy-step" id="ps2">🔍 Checking stock at nearby pharmacies...</div>
+            <div class="pharmacy-step" id="ps3">✅ Pharmacy confirmed!</div>
+          </div>
+          <div class="pharmacy-result" id="pharmacyResult" style="display:none;">
+            <div style="text-align:center;padding:8px;">
+              <div style="font-size:28px;margin-bottom:4px;">✅</div>
+              <div class="screen-header">Pharmacy Matched</div>
+              <p class="screen-subtitle">${drug} is in stock</p>
+            </div>
+            <div class="clinic-detail-card">
+              <div class="clinic-detail-row"><i class="ph ph-storefront"></i><div><span class="detail-label">Pharmacy</span><span class="detail-value">${pharmacy.name}</span></div></div>
+              <div class="clinic-detail-row"><i class="ph ph-pill"></i><div><span class="detail-label">Medication</span><span class="detail-value">${drug} 500mg · 14 tablets</span></div></div>
+              <div class="clinic-detail-row"><i class="ph ph-currency-circle-dollar"></i><div><span class="detail-label">Est. Cost</span><span class="detail-value">¥2,800 (~$18)</span></div></div>
+              <div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Ready in</span><span class="detail-value">~15 minutes</span></div></div>
+              <div class="clinic-detail-row"><i class="ph ph-map-pin"></i><div><span class="detail-label">Location</span><span class="detail-value">${pharmacy.distance} · ${pharmacy.hours}</span></div></div>
+            </div>
+            <div class="route-map">
+              <div class="route-start">📍 You are here</div>
+              <div class="route-line"></div>
+              <div class="route-end">💊 ${pharmacy.name}</div>
+            </div>
+            <button class="btn-primary" id="btnConfirmRx"><i class="ph ph-check-circle"></i> Send to Pharmacy</button>
+          </div>
+        </div>`;
+      },
+
+      pickupReady: (ctx) => {
+        const drug = ctx.newPrescription || 'Ciprofloxacin';
+        const pharmacy = { name: 'Tomod\'s Shinjuku', distance: '1.0km', hours: '9:00-23:00', phone: '03-3352-3333', language: '🇬🇧 Some English' };
+        const pickupCode = 'RX' + Math.random().toString(36).substring(2,6).toUpperCase();
+        return `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:8px;">
+            <div style="font-size:36px;margin-bottom:4px;">✅</div>
+            <div class="screen-header">Ready for Pickup</div>
+            <p class="screen-subtitle">Your medication is waiting at the pharmacy</p>
+          </div>
+          <div class="pickup-code-card">
+            <div class="pickup-label">Show this code at the counter</div>
+            <div class="pickup-code">${pickupCode}</div>
+            <div class="pickup-drug">💊 ${drug} 500mg · 14 tablets</div>
+          </div>
+          <div class="clinic-detail-card">
+            <div class="clinic-detail-row"><i class="ph ph-storefront"></i><div><span class="detail-label">Pickup at</span><span class="detail-value">${pharmacy.name}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-phone-call"></i><div><span class="detail-label">Phone</span><span class="detail-value">${pharmacy.phone}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Hours</span><span class="detail-value">${pharmacy.hours}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-globe"></i><div><span class="detail-label">Language</span><span class="detail-value">${pharmacy.language}</span></div></div>
+            <div class="clinic-detail-row"><i class="ph ph-currency-circle-dollar"></i><div><span class="detail-label">Pay at counter</span><span class="detail-value">¥2,800 (~$18) · Cash or card</span></div></div>
+          </div>
+          <div class="route-map">
+            <div class="route-start">📍 You are here</div>
+            <div class="route-line"></div>
+            <div class="route-end">💊 ${pharmacy.name}</div>
+          </div>
+          <button class="btn-primary" onclick="showToast('🗺️ Opening Google Maps...')"><i class="ph ph-map-pin"></i> Get Directions</button>
+          <div class="booking-tips">
+            <p><strong>📋 What to bring:</strong> Passport, prescription (if you have it), payment</p>
+            <p><strong>🇯🇵 At the counter:</strong> Show the pickup code. Say "処方箋を受け取りに来ました" (Shohousen wo uketori ni kimashita)</p>
+          </div>
+        </div>`;
+      },
+
+      drugInteraction: (ctx) => {
+        const drug = ctx.newPrescription || 'Ciprofloxacin';
+        const med = (ctx.currentMeds && ctx.currentMeds[0]) || 'Warfarin';
+        return `
+        <div class="screen screen-interaction">
+          <div class="interaction-card interaction-critical">
+            <div class="interaction-header"><i class="ph ph-warning"></i><span>CRITICAL INTERACTION</span></div>
+            <h3>${drug} + ${med}</h3>
+            <p class="interaction-summary">Increased Bleeding Risk</p>
+            <div class="severity-bar"><div class="severity-fill critical" style="width:85%"></div></div>
+            <p class="interaction-detail">${drug} can increase the anticoagulant effect of ${med}. INR should be monitored closely.</p>
+            <div class="suggested-question"><h4>💬 Suggested question for your doctor</h4><p class="question-en">"Should I have my INR monitored while taking this medication?"</p><p class="question-jp">「この薬を服用中、INRをモニタリングすべきですか？」</p></div>
+            <p class="disclaimer">⚠️ AI-generated. Always confirm with your pharmacist or doctor.</p>
+          </div>
+          <div class="translate-mini">
+            <div class="translate-mini-header">
+              <i class="ph ph-translate"></i>
+              <span>Live Translate — Pharmacist</span>
+            </div>
+            <div class="lt-mic-area">
+              <div class="lt-mic-btn pulsing" onclick="showToast('🎤 Listening...')"><i class="ph ph-microphone"></i></div>
+              <p class="lt-mic-hint">Tap to speak to the pharmacist</p>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 この薬は${med}と相互作用する可能性がありますか？')">
+                <span>Could this interact with ${med}?</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 この薬は${med}と相互作用する可能性がありますか？')">
+                <span>この薬は${med}と相互作用しますか？</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 INRをモニタリングする必要がありますか？')">
+                <span>Should my INR be monitored?</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 INRをモニタリングする必要がありますか？')">
+                <span>INRをモニタリングする必要がありますか？</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 どのような副作用に注意すべきですか？')">
+                <span>What side effects to watch for?</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 どのような副作用に注意すべきですか？')">
+                <span>副作用に注意すべきですか？</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+            </div>
+            <div class="lt-bubbles">
+              <div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 英語で説明してもらえますか？')">
+                <span>Can you explain in English?</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+              <div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 英語で説明してもらえますか？')">
+                <span>英語で説明してもらえますか？</span>
+                <i class="ph ph-speaker-high"></i>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      },
+
+      receipt: () => `
+        <div class="screen screen-receipt">
+          <div class="screen-header">📸 Receipt Scanner</div>
+          <div class="receipt-mock"><div class="receipt-paper">
+            <div class="receipt-hospital">St. Luke's International Hospital</div><div class="receipt-stamp">㊞</div>
+            <div class="receipt-divider">- - - - - - - - - - - - - - - -</div><div class="receipt-date">2026年6月23日</div>
+            <div class="receipt-item"><span>診察料</span><span>¥5,000</span></div>
+            <div class="receipt-item"><span>血液検査</span><span>¥8,000</span></div>
+            <div class="receipt-item"><span>心電図</span><span>¥3,000</span></div>
+            <div class="receipt-divider">- - - - - - - - - - - - - - - -</div>
+            <div class="receipt-total"><span>合計</span><span>¥16,000</span></div>
+          </div></div>
+          <div class="ocr-result">
+            <div class="ocr-status">✅ Receipt analyzed — 1 point = ¥10</div>
+            <div class="claim-summary">
+              <div class="claim-row"><span>Consultation</span><span>¥5,000</span></div>
+              <div class="claim-row"><span>Blood Test</span><span>¥8,000</span></div>
+              <div class="claim-row"><span>ECG</span><span>¥3,000</span></div>
+              <div class="claim-row claim-total"><span>Total</span><span>¥16,000</span></div>
+            </div>
+          <button class="btn-primary" id="btnGenClaim" onclick="showToast('📋 Generating claim form...'); setTimeout(()=>navigateTo(sessionState.currentStep+1),1000)"><i class="ph ph-file-pdf"></i> Generate Claim PDF</button>
+          </div>
+        </div>`,
+
+      claimGenerated: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:8px;">
+            <div style="font-size:32px;margin-bottom:4px;">📋</div>
+            <div class="screen-header">Insurance Claim Generated</div>
+            <p class="screen-subtitle">Your claim form is ready. Submit to your insurer for reimbursement.</p>
+          </div>
+          <div class="claim-form-card">
+            <div class="claim-form-header">Travel Insurance Claim Form</div>
+            <div class="claim-section"><div class="claim-section-title">Patient Information</div>
+              <div class="claim-field"><span>Name</span><span>Alex Chen</span></div>
+              <div class="claim-field"><span>Date of Birth</span><span>1992-03-15</span></div>
+              <div class="claim-field"><span>Passport</span><span>USA · 5123****</span></div>
+              <div class="claim-field"><span>Insurance</span><span>Allianz Travel · POL-8821****</span></div>
+            </div>
+            <div class="claim-section"><div class="claim-section-title">Medical Provider</div>
+              <div class="claim-field"><span>Clinic</span><span>St. Luke's International Hospital</span></div>
+              <div class="claim-field"><span>Date of Visit</span><span>2026-06-23</span></div>
+              <div class="claim-field"><span>Diagnosis</span><span>Acute febrile illness / Respiratory infection</span></div>
+            </div>
+            <div class="claim-section"><div class="claim-section-title">Itemized Charges</div>
+              <div class="claim-field"><span>Consultation</span><span>¥5,000</span></div>
+              <div class="claim-field"><span>Blood Test (CBC, CRP)</span><span>¥8,000</span></div>
+              <div class="claim-field"><span>ECG</span><span>¥3,000</span></div>
+              <div class="claim-field claim-total-field"><span>Total Claimed</span><span>¥16,000 (~$102)</span></div>
+            </div>
+            <div class="claim-section"><div class="claim-section-title">Attachments</div>
+              <div class="claim-field"><span>📄 Original Receipt (領収書)</span><span>✅ Attached</span></div>
+              <div class="claim-field"><span>📋 Medical Certificate (診断書)</span><span>✅ Attached</span></div>
+              <div class="claim-field"><span>💳 Insurance Card Copy</span><span>✅ Attached</span></div>
+            </div>
+          </div>
+          <div class="claim-actions">
+            <button class="btn-primary" onclick="showToast('📥 PDF downloaded — submit to Allianz')"><i class="ph ph-download"></i> Download Claim PDF</button>
+            <button class="btn-primary" style="background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="showToast('📤 Claim submitted to Allianz. Track: ALZ-2026-****')"><i class="ph ph-paper-plane-tilt"></i> Send to Insurance</button>
+          </div>
+          <div class="booking-tips">
+            <p><strong>⏱️ Processing time:</strong> 5-10 business days (Allianz Travel)</p>
+            <p><strong>💡 Tip:</strong> Keep originals. Some insurers require physical copies by mail.</p>
+          </div>
+        </div>`,
+
+      whatToDo: (ctx) => `
+        <div class="screen screen-info">
+          <div class="screen-header">✅ What to Do Now</div>
+          <p class="screen-subtitle">${ctx.drugName||'This medication'} cannot be brought to Japan. Here's your plan.</p>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card" style="border-left:3px solid var(--error);"><h4>1. Contact Your Doctor</h4><p>Ask for a Japan-legal alternative. Many common medications have equivalents available in Japan.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>2. Get a Prescription Letter</h4><p>Your doctor must provide a letter with: diagnosis, alternative medication name, dosage, and medical necessity.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--warning);"><h4>3. Find in Japan</h4><p>Many Japanese pharmacies can fill foreign prescriptions with a doctor's letter. We'll help you find one.</p></div>
+          </div>
+        </div>`,
+
+      airportGuide: (ctx) => `
+        <div class="screen screen-info">
+          <div class="screen-header">🛬 At the Airport</div>
+          <p class="screen-subtitle">What to expect at Japanese customs with your medication</p>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 Declare it</h4><p>Go to the "Goods to Declare" lane (red). Show your Yunyu Kakunin-sho certificate + prescription.</p></div>
+            <div class="info-card" style="border-left:3px solid #34A853;"><h4>📦 Original packaging</h4><p>Keep medication in original packaging with your name. Airport pharmacy labels are ideal.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--warning);"><h4>🗣️ What to say</h4><p>"薬の輸入許可証を持っています" (Kusuri no yunyu kyokasho wo motteimasu) — I have a medication import permit.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--error);"><h4>⚠️ Without permit</h4><p>Medication may be confiscated. You could be detained. Always apply BEFORE traveling.</p></div>
+          </div>
+        </div>`,
+
+      pharmacistTranslate: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">🗣️ Talk to Pharmacist</div>
+          <p class="screen-subtitle">Show these phrases at the pharmacy counter</p>
+          <div class="lt-mic-area"><div class="lt-mic-btn pulsing" onclick="showToast('🎤 Listening...')"><i class="ph ph-microphone"></i></div><p class="lt-mic-hint">Tap to speak to pharmacist</p></div>
+          <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 この薬をもらえますか？')"><span>Can I get this medication?</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 この薬をもらえますか？')"><span>この薬をもらえますか？</span><i class="ph ph-speaker-high"></i></div></div>
+          <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 処方箋はこちらです。')"><span>Here is my prescription.</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 処方箋はこちらです。')"><span>処方箋はこちらです。</span><i class="ph ph-speaker-high"></i></div></div>
+          <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 副作用はありますか？')"><span>Any side effects?</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 副作用はありますか？')"><span>副作用はありますか？</span><i class="ph ph-speaker-high"></i></div></div>
+          <div class="lt-bubbles"><div class="lt-bubble lt-bubble-user" onclick="showToast('🔊 どのように服用しますか？')"><span>How do I take this?</span><i class="ph ph-speaker-high"></i></div><div class="lt-bubble lt-bubble-jp" onclick="showToast('🔊 どのように服用しますか？')"><span>どのように服用しますか？</span><i class="ph ph-speaker-high"></i></div></div>
+        </div>`,
+
+      showRx: (ctx) => { var m=[{n:"アモキシシリン",en:"Amoxicillin",d:"250mg",q:"21 tablets",u:"1日3回 毎食後",ue:"3x daily after meals",dy:"7 days"},{n:"カロナール",en:"Calonal",d:"200mg",q:"14 tablets",u:"1日2回 朝夕食後",ue:"2x daily",dy:"7 days"},{n:"ムコダイン",en:"Mucodyne",d:"500mg",q:"21 tablets",u:"1日3回 毎食後",ue:"3x daily",dy:"7 days"},{n:"トラネキサム酸",en:"Tranexamic Acid",d:"250mg",q:"14 tablets",u:"1日2回",ue:"2x daily",dy:"7 days"}];var c=sessionState.pathContext.selectedClinic||{name:"Tokyo Midtown Medical"};var hh="";for(var i=0;i<m.length;i++){hh+="<div class=rx-med-item id=rxMed"+i+" onclick=toggleRxDetail("+i+")><div class=rx-med-top><span class=rx-med-num>"+(i+1)+"</span><div class=rx-med-info><div class=rx-med-name>"+m[i].n+"</div><div class=rx-med-en>"+m[i].en+"</div></div><div class=rx-med-qty>"+m[i].q+"</div></div><div class=rx-med-detail id=rxDetail"+i+" style=display:none><div class=rx-detail-row><span>Dosage</span><span>"+m[i].d+"</span></div><div class=rx-detail-row><span>Usage (JP)</span><span>"+m[i].u+"</span></div><div class=rx-detail-row><span>Usage (EN)</span><span>"+m[i].ue+"</span></div><div class=rx-detail-row><span>Duration</span><span>"+m[i].dy+"</span></div></div></div>"}return "<div class=screen style=padding:16px;background:var(--surface);min-height:100%;gap:12px><div class=screen-header>📋 Prescription</div><div class=rx-document><div class=rx-doc-header><div class=rx-doc-title>処 方 箋</div><div class=rx-doc-meta><div class=rx-meta-row><span>Issue Date</span><span>June 23, 2026</span></div><div class=rx-meta-row><span>Valid Until</span><span>June 27, 2026</span></div><div class=rx-meta-row><span>Clinic</span><span>"+c.name+"</span></div><div class=rx-meta-row><span>Doctor</span><span>Dr. Kenichi Tanaka</span></div><div class=rx-meta-row><span>Patient</span><span>Alex Chen</span></div></div></div><div class=rx-meds-list>"+hh+"</div><div class=rx-doc-footer><p>⚠️ Valid for 4 days from issue date</p></div></div><button class=btn-primary onclick=navigateTo(sessionState.currentStep-1)><i class=ph ph-arrow-left></i> Back</button></div>" },
+
+      commonPhrases: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">📖 Common Medical Phrases</div>
+          <p class="screen-subtitle">Essential Japanese for your doctor visit</p>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${[['It hurts here.', 'ここが痛いです。'], ['Since when?', 'いつからですか？'], ['I have a fever.', '熱があります。'], ['I feel nauseous.', '吐き気がします。'], ['I am pregnant.', '妊娠しています。'], ['I have allergies.', 'アレルギーがあります。'], ['Please speak slowly.', 'ゆっくり話してください。'], ['I don\'t understand.', 'わかりません。'], ['Can you write it down?', '書いていただけますか？'], ['Thank you.', 'ありがとうございます。']].map(([en,jp]) => `<div class="info-card" style="display:flex;justify-content:space-between;align-items:center;"><div><p style="font-size:13px;">${en}</p><p style="font-size:12px;color:var(--on-surface-variant);">${jp}</p></div></div>`).join('')}
+          </div>
+        </div>`,
+
+      prescriptionRequest: (ctx) => `
+        <div class="screen screen-script">
+          <div class="screen-header">📋 Replacement Prescription</div>
+          <p class="screen-subtitle">Show this at the clinic to request a replacement</p>
+          <div class="script-card">
+            <div class="script-lang-label">🇯🇵 Japanese — show to the doctor</div>
+            <p class="script-text-jp">薬をなくしました。海外から持ってきた薬です。代替の処方箋を書いていただけますか？</p>
+            <div class="script-divider"></div>
+            <p class="script-text-en">I lost my medication. It was brought from overseas. Could you please write me a replacement prescription?</p>
+          </div>
+          <div class="booking-tips"><p><strong>💡 Tip:</strong> Bring remaining packaging or photo of your original prescription.</p></div>
+        </div>`,
+
+      endMedication: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">💊</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">Medication Check Complete</h2><p style="font-size:13px;color:var(--on-surface-variant);">You now know what's safe to bring and what needs a permit.</p></div>
+          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      endTranslation: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">🗣️</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You're Ready to Communicate</h2><p style="font-size:13px;color:var(--on-surface-variant);">Use these phrases anytime during your visit. Come back if you need more help.</p></div>
+          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      endCost: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:20px 0;"><div style="font-size:48px;">💰</div><h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">You Know Your Costs</h2><p style="font-size:13px;color:var(--on-surface-variant);">Now you can plan your budget. Remember: always keep receipts for claims.</p></div>
+          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      endClinic: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div style="text-align:center;padding:20px 0;">
+            <div style="font-size:48px;">🎉</div>
+            <h2 style="font-family:var(--font-display);font-size:18px;margin:12px 0;">All done!</h2>
+            <p style="font-size:13px;color:var(--on-surface-variant);">Your visit is complete. Claim submitted, medication picked up.</p>
+          </div>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>📋 Track your claim</h4><p>Allianz typically processes claims in 5-10 business days. Check your email for updates.</p></div>
+            <div class="info-card" style="border-left:3px solid var(--warning);"><h4>⚠️ Remember</h4><p>If symptoms return or worsen, come back to MediRoute immediately.</p></div>
+          </div>
+          <button class="btn-primary" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`,
+
+      howToGetRx: () => {
+        var visits = [
+          { name: '東京ミッドタウンクリニック', date: '2026-03-12', reason: '健康診断', specialty: '内科' },
+          { name: '新宿三丁目クリニック', date: '2025-11-28', reason: 'インフルエンザ', specialty: '内科' },
+          { name: '聖路加国際病院', date: '2025-06-15', reason: '渡航予防接種', specialty: '総合' },
+          { name: '六本木ヒルズクリニック', date: '2024-09-03', reason: 'アレルギー相談', specialty: '皮膚科' },
+        ];
+        var h='';
+        for (var i=0;i<visits.length;i++) {
+          var v=visits[i];
+          h+='<div class="clinic-card" style="cursor:pointer" onclick="sessionState.pathContext.selectedClinic={name:\''+v.name+'\',specialty:\''+v.specialty+'\',phone:\'03-'+Math.floor(Math.random()*9000+1000)+'-'+Math.floor(Math.random()*9000+1000)+'\',hours:\'9:00-19:00\',language:\'English available\',distance:\''+(1+Math.random()*3).toFixed(1)+'km\'};navigateTo(sessionState.currentStep+1)"><div class="clinic-card-top"><div><h4>'+v.name+'</h4><span class="badge badge-internal">'+v.specialty+'</span></div><span style="font-size:12px;color:var(--on-surface-variant);">'+v.date+'</span></div><div class="clinic-meta"><span>📋 '+v.reason+'</span></div></div>';
+        }
+        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">🏥 Your Past Visits</div><p class="screen-subtitle">Select a clinic to request a prescription</p><div class="clinic-list">'+h+'</div><button class="btn-primary" style="margin-top:12px;background:var(--surface);color:var(--primary);border:1px solid var(--primary);" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-magnifying-glass"></i> Search Another Clinic</button><button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button></div>';
+      },
+
+      clinicDetail: (ctx) => {
+        var clinic = sessionState.pathContext.selectedClinic || { name: 'Tokyo Midtown Medical', specialty: 'Internal Medicine', phone: '03-5413-0080', hours: '9:00-21:00', language: 'English available', distance: '2.1km' };
+        return '<div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;"><div class="screen-header">'+clinic.name+'</div><div class="clinic-detail-card"><div class="clinic-detail-row"><i class="ph ph-stethoscope"></i><div><span class="detail-label">Specialty</span><span class="detail-value">'+clinic.specialty+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-phone-call"></i><div><span class="detail-label">Phone</span><span class="detail-value">'+clinic.phone+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-clock"></i><div><span class="detail-label">Hours</span><span class="detail-value">'+clinic.hours+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-globe"></i><div><span class="detail-label">Language</span><span class="detail-value">'+clinic.language+'</span></div></div><div class="clinic-detail-row"><i class="ph ph-map-pin"></i><div><span class="detail-label">Distance</span><span class="detail-value">'+clinic.distance+'</span></div></div></div><div class="rx-doc-header" style="background:#fafaf5;border:1px solid var(--outline);border-radius:var(--radius-md);padding:12px;margin-top:12px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">📋 What you need</div><p style="font-size:12px;color:var(--on-surface-variant);line-height:1.6;">• Your foreign prescription or pill bottle<br>• Passport and insurance card<br>• The doctor will examine you and issue a Japanese prescription (処方箋)</p></div><button class="btn-primary" style="margin-top:12px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-file-text"></i> View Prescription</button><button class="btn-primary" style="margin-top:4px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="navigateTo(sessionState.currentStep-1)"><i class="ph ph-arrow-left"></i> Back</button></div>';
+      },
+
+      preTravelInput: () => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div class="screen-header">🛫 Pre-Travel Medication Check</div>
+          <p class="screen-subtitle">Check if your medication is legal to bring to Japan</p>
+          <div class="ins-form">
+            <div class="ins-field"><label class="ins-label">Medication Name</label>
+              <select id="preMeds" class="ins-select"><option value="">Select your medication...</option><option value="adderall">Adderall (amphetamine)</option><option value="vyvanse">Vyvanse</option><option value="ritalin">Ritalin</option><option value="sudafed">Sudafed</option><option value="vicks">Vicks Inhaler</option><option value="codeine">Codeine</option><option value="xanax">Xanax</option><option value="valium">Valium</option><option value="prozac">Prozac</option><option value="zoloft">Zoloft</option><option value="concerta">Concerta</option><option value="insulin">Insulin</option></select>
+            </div>
+          </div>
+          <button class="btn-primary" id="btnCheckMeds"><i class="ph ph-magnifying-glass"></i> Check Status</button>
+          <div id="preTravelResultDiv" style="display:none;margin-top:12px;"></div>
+        </div>`,
+
+      preTravelResult: (ctx) => `
+        <div class="screen" style="padding:16px;background:var(--surface);min-height:100%;gap:12px;">
+          <div id="travelResultContent"></div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> Continue</button>
+        </div>`,
+
+      selfCare: () => `
+        <div class="screen screen-info">
+          <div class="screen-header">💧 Self-Care Tips</div>
+          <p class="screen-subtitle">Your symptoms are mild. Try these first.</p>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card"><i class="ph ph-drop"></i><h4>Rest & Hydrate</h4><p>Get plenty of rest and drink fluids. Your body needs energy to recover.</p></div>
+            <div class="info-card"><i class="ph ph-pill"></i><h4>OTC Medications</h4><p>Visit a pharmacy for over-the-counter relief. Pharmacists can advise on Japanese equivalents.</p></div>
+            <div class="info-card"><i class="ph ph-clock"></i><h4>Monitor Symptoms</h4><p>If symptoms worsen within 48 hours, find a clinic immediately.</p></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="jumpToScreen('clinicSearch')"><i class="ph ph-hospital"></i> I'd Rather Find a Clinic Now</button>
+        </div>`,
+
+      drugInteractionInput: (ctx) => `
+        <div class="screen screen-form">
+          <div class="screen-header">💊 Check Drug Interactions</div>
+          <div style="margin-bottom:16px;">
+            <div class="field-label" style="margin-bottom:8px;">YOUR CURRENT MEDICATIONS</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">${(ctx.currentMeds||['Warfarin']).map(m=>`<span class="badge badge-internal" style="font-size:14px;padding:6px 12px;">💊 ${m}</span>`).join('')}</div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div class="field-label" style="margin-bottom:8px;">NEW PRESCRIPTION</div>
+            <span class="badge" style="font-size:14px;padding:6px 12px;background:#FFF5F5;color:var(--error);">💊 ${ctx.newPrescription||'Ciprofloxacin'}</span>
+          </div>
+          <button class="btn-primary" id="checkInteractions"><i class="ph ph-warning"></i> Check Interactions</button>
+        </div>`,
+
+      yunyuGuide: () => `
+        <div class="screen screen-info">
+          <div class="screen-header">📋 Yunyu Kakunin-sho Guide</div>
+          <p class="screen-subtitle">Japan's official medication import permit — apply 2+ weeks before travel</p>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card"><i class="ph ph-file-text"></i><h4>1. Get Doctor's Letter</h4><p>Your doctor must state: diagnosis, medication name, dosage, and why you need it.</p></div>
+            <div class="info-card"><i class="ph ph-envelope"></i><h4>2. Submit Application</h4><p>Email the MHLW with your doctor's letter + medication details. Processing: 2-3 weeks.</p></div>
+            <div class="info-card"><i class="ph ph-check-circle"></i><h4>3. Receive Permit</h4><p>If approved, you'll receive a Yunyu Kakunin-sho certificate. Carry this with your medication.</p></div>
+            <div class="info-card"><i class="ph ph-airplane-takeoff"></i><h4>4. Declare at Customs</h4><p>Show the certificate + original packaging + prescription at Japanese customs.</p></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="showToast('📄 Application form downloaded')"><i class="ph ph-download"></i> Download Application Form</button>
+        </div>`,
+
+      pharmacyFinder: (ctx) => {
+        const list = ctx.clinics || clinics.pharmacy;
+        const sel = sessionState.pathContext.selectedClinic;
+        return `
+        <div class="screen screen-clinics">
+          <div class="screen-header">💊 Nearest Pharmacies</div>
+          <div class="map-mock" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9,#E8F5E9);"><div class="map-grid" style="background-image:linear-gradient(rgba(0,137,123,0.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,137,123,0.08) 1px,transparent 1px);"></div><div class="map-pin" style="background:#00897B;"></div><span class="map-label">Google Maps Grounding — Shinjuku area</span></div>
+          <div class="clinic-list">
+            ${list.map((c,i)=>{const isSel=sel?sel.name===c.name:i===0;return`<div class="clinic-card${isSel?' selected':''}" data-clinic-index="${i}" style="${isSel?'border-color:#00897B;background:#F0FAF8;':''}"><div class="clinic-card-top"><div><h4>${c.name}</h4><span class="badge badge-lang">${c.language}</span></div>${isSel?'<i class="ph ph-check-circle" style="font-size:24px;color:#00897B;"></i>':'<button class="btn-select" data-clinic-index="'+i+'">Select</button>'}</div><div class="clinic-meta"><span><i class="ph ph-map-pin"></i> ${c.distance}</span><span><i class="ph ph-clock"></i> ${c.hours}</span></div></div>`;}).join('')}
+          </div>
+          <p class="citation">Source: Google Maps Grounding</p>
+        </div>`;
+      },
+
+      embassyContact: () => `
+        <div class="screen screen-info">
+          <div class="screen-header">🏛️ Your Embassy</div>
+          <p class="screen-subtitle">If you're arrested or need urgent consular assistance</p>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card" style="border-left:3px solid var(--primary);"><h4>🇺🇸 US Embassy Tokyo</h4><p style="font-size:14px;font-weight:700;margin:4px 0;">📞 03-3224-5000</p><p style="font-size:12px;">American Citizen Services — 24h emergency line</p><p style="font-size:12px;margin-top:4px;color:var(--on-surface-variant);">Tell them: "I need assistance with medication regulations in Japan." They've handled this before.</p></div>
+          </div>
+          <a href="tel:+81332245000" class="btn-primary" style="text-decoration:none;margin-top:12px;"><i class="ph ph-phone-call"></i> Call Embassy</a>
+        </div>`,
+
+      liveTranslation: (ctx) => {
+        // Build contextual phrases based on symptoms
+        const summary = (ctx.chatSummary || '').toLowerCase();
+        let phrases = [];
+        if (/fever|temperature|hot|chills|flu|cough/i.test(summary)) {
+          phrases = [
+            ["I have a fever.","熱があります。"],
+            ["My temperature is high.","体温が高いです。"],
+            ["I've had this fever for X days.","この熱はX日間続いています。"],
+            ["I have a cough.","咳が出ます。"],
+            ["I have chills and body aches.","悪寒と体の痛みがあります。"],
+            ["I feel very weak.","とてもだるいです。"],
+            ["My throat hurts.","喉が痛いです。"],
+            ["Do I need antibiotics?","抗生物質は必要ですか？"],
+          ];
+        } else if (/chest pain|shortness of breath|heart/i.test(summary)) {
+          phrases = [
+            ["I have chest pain.","胸が痛いです。"],
+            ["It's hard to breathe.","息が苦しいです。"],
+            ["The pain started X hours ago.","痛みはX時間前に始まりました。"],
+            ["It gets worse when I move.","動くと悪化します。"],
+            ["I feel dizzy.","めまいがします。"],
+            ["I'm sweating a lot.","汗がたくさん出ます。"],
+            ["Is it my heart?","心臓の問題ですか？"],
+            ["Do I need an ECG?","心電図は必要ですか？"],
+          ];
+        } else if (/headache|migraine|head/i.test(summary)) {
+          phrases = [
+            ["I have a headache.","頭が痛いです。"],
+            ["It's throbbing on one side.","片側がズキズキします。"],
+            ["Light makes it worse.","光で悪化します。"],
+            ["I feel nauseous too.","吐き気もあります。"],
+            ["How long will this last?","どのくらい続きますか？"],
+            ["Can I take painkillers?","痛み止めを飲んでもいいですか？"],
+          ];
+        } else if (/stomach|abdominal|diarrhea|nausea|vomit/i.test(summary)) {
+          phrases = [
+            ["I have stomach pain.","お腹が痛いです。"],
+            ["I have diarrhea.","下痢があります。"],
+            ["I feel like throwing up.","吐きそうです。"],
+            ["I can't keep food down.","食事がとれません。"],
+            ["What should I eat?","何を食べればいいですか？"],
+            ["I need rehydration salts.","経口補水液が必要です。"],
+          ];
+        } else if (/injury|sprain|fracture|fell|hurt/i.test(summary)) {
+          phrases = [
+            ["I hurt myself here.","ここをケガしました。"],
+            ["I can't move it.","動かせません。"],
+            ["It's swollen.","腫れています。"],
+            ["How bad is it?","どのくらいひどいですか？"],
+            ["Do I need an X-ray?","レントゲンは必要ですか？"],
+            ["Can you give me pain relief?","痛み止めをもらえますか？"],
+          ];
+        } else {
+          phrases = [
+            ["Where does it hurt?","どこが痛みますか？"],
+            ["How long?","どのくらい続いていますか？"],
+            ["I'm allergic to...","アレルギーがあります..."],
+            ["I take these medications...","これらの薬を服用しています..."],
+            ["When did it start?","いつからですか？"],
+            ["Does it hurt when I press here?","ここを押すと痛みますか？"],
+          ];
+        }
+        return `
+        <div class="screen screen-form">
+          <div class="screen-header">🎤 Live Translation</div>
+          <div style="text-align:center;padding:20px;">
+            <div class="btn-119 pulsing" style="width:80px;height:80px;border-radius:50%;margin:20px auto;font-size:32px;padding:0;"><i class="ph ph-microphone"></i></div>
+            <p style="font-size:13px;color:var(--on-surface-variant);">Tap to speak</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+            ${phrases.map(([en,jp]) => `<div class="info-card" style="display:flex;justify-content:space-between;align-items:center;"><div><p style="font-size:13px;">"${en}"</p><p style="font-size:12px;color:var(--on-surface-variant);">${jp}</p></div><i class="ph ph-speaker-high" style="font-size:20px;color:var(--primary);"></i></div>`).join('')}
+          </div>
+          <button class="btn-primary" style="margin-top:8px;background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);" onclick="goToHub()"><i class="ph ph-house"></i> Back to Main Page</button>
+        </div>`;
+      },
+
+      insuranceExplainer: () => `
+        <div class="screen screen-info">
+          <div class="screen-header">💳 Travel Insurance in Japan</div>
+          <div class="info-grid" style="grid-template-columns:1fr;">
+            <div class="info-card"><i class="ph ph-currency-circle-dollar"></i><h4>1. You Pay Upfront</h4><p>Hospitals in Japan require payment at time of service. Keep the receipt (領収書 / Ryoushuusho).</p></div>
+            <div class="info-card"><i class="ph ph-envelope"></i><h4>2. Submit Claim</h4><p>Send your receipts + claim form to your insurer: Allianz, Sompo, World Nomads, etc.</p></div>
+            <div class="info-card"><i class="ph ph-camera"></i><h4>3. MediRoute Auto-Fills</h4><p>Take a photo of your Japanese receipt. MediRoute extracts all fields and generates your claim form.</p></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="navigateTo(sessionState.currentStep+1)"><i class="ph ph-arrow-right"></i> See a Sample Claim</button>
+        </div>`,
+
+      receiptPreview: () => `
+        <div class="screen screen-receipt">
+          <div class="screen-header">📸 Sample Receipt</div>
+          <div class="receipt-mock"><div class="receipt-paper">
+            <div class="receipt-hospital">St. Luke's International Hospital</div><div class="receipt-stamp">㊞</div>
+            <div class="receipt-divider">- - - - - - - - - - - - - - - -</div><div class="receipt-date">2026年6月23日</div>
+            <div class="receipt-item"><span>診察料</span><span>¥5,000</span></div>
+            <div class="receipt-item"><span>血液検査</span><span>¥8,000</span></div>
+            <div class="receipt-item"><span>心電図</span><span>¥3,000</span></div>
+            <div class="receipt-divider">- - - - - - - - - - - - - - - -</div>
+            <div class="receipt-total"><span>合計</span><span>¥16,000</span></div>
+          </div></div>
+          <p style="font-size:12px;color:var(--on-surface-variant);text-align:center;margin-top:12px;">Your insurer needs: clinic name, date, itemized charges, and total.</p>
+          <p style="font-size:10px;color:var(--primary);text-align:center;">← Clinic name ↑ Stamp (required) → Total (1 point = ¥10)</p>
+        </div>`,
+
+      visaWaming: () => `
+        <div class="screen screen-interaction">
+          <div class="interaction-card interaction-critical" style="border-color:var(--error);background:#FFF5F5;">
+            <div class="interaction-header" style="color:var(--error);"><i class="ph ph-warning-circle"></i><span>VISA DENIAL RISK</span></div>
+            <h3>Unpaid Medical Bills = No Re-Entry</h3>
+            <p class="interaction-summary" style="color:var(--error);">Debt ≥¥10,000 → Automatic Visa Denial</p>
+            <div class="severity-bar"><div class="severity-fill critical" style="width:100%"></div></div>
+            <p class="interaction-detail">As of <strong>April 2026</strong>: any unpaid medical bill ≥¥10,000 (~$64) results in <strong>automatic visa denial</strong> on your next attempt to enter Japan. Even if you're leaving tomorrow — <strong>pay before you go</strong>.</p>
+            <div class="suggested-question"><h4>✅ What to do</h4>
+              <p style="font-size:13px;line-height:1.6;margin-bottom:4px;">1. Get your receipt (領収書) from the hospital cashier</p>
+              <p style="font-size:13px;line-height:1.6;margin-bottom:4px;">2. Pay in full — cash, credit card, or insurance advance</p>
+              <p style="font-size:13px;line-height:1.6;">3. Keep the receipt for your insurance claim</p>
+            </div>
+            <p class="disclaimer">⚠️ Source: Nikkei Asia, November 2025. Effective April 2026.</p>
+          </div>
+        </div>`,
+    };
+
+    function jumpToScreen(screenId) {
+      const route = currentRouteData();
+      if (!route) return;
+      const idx = route.screens.indexOf(screenId);
+      if (idx >= 0) navigateTo(idx);
+    }
+
+    function toggleRxDetail(idx) {
+      const el = document.getElementById('rxDetail'+idx);
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+    function applyCoverageToCostCards(data) {
+      if (!data) return;
+      const subtitle = document.getElementById('coverageSubtitle');
+      if (subtitle) subtitle.innerHTML = 'Based on: <strong>' + (data.provider==='None'?'No insurance':data.provider) + '</strong>';
+      ['csClinic','csER','csPenalty','csRx'].forEach((id,i) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const keys = ['clinic','er','penalty','rx'];
+        const labels = [
+          ['✅ Covered · pay upfront, get reimbursed','⚠️ You pay ¥5,000–¥15,000 out of pocket'],
+          ['✅ Covered · labs, CT, meds included','⚠️ You pay ¥36,000–¥59,000 out of pocket'],
+          ['✅ Covered if emergency','⚠️ ¥7,000–¥11,000 added to your bill'],
+          ['✅ Covered','⚠️ You pay ¥1,000–¥5,000'],
+        ];
+        const covered = data[keys[i]];
+        el.textContent = covered ? labels[i][0] : labels[i][1];
+        el.style.color = covered ? '#137333' : 'var(--error)';
+        const card = el.closest('.cost-card');
+        if (card) { card.style.borderColor = covered ? '#34A853' : 'var(--error)'; card.style.background = covered ? '#F6FEF6' : '#FFF5F5'; }
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // CHAT TRIAGE ENGINE
+    // ══════════════════════════════════════════
+    function initChat() {
+      const ce = sessionState.chatEngine;
+      ce.history = [];
+      ce.verdict = null;
+      ce.severityBump = 0;
+      ce.detectedMeds = [];
+      ce.currentNode = null;
+      // Show initial AI message
+      setTimeout(() => {
+        ce.history.push({ role: 'assistant', text: "Hi, I'm MediRoute. I'll help figure out what's going on and guide you to the right care.\n\nWhat brings you here today? Describe your symptoms in your own words." });
+        renderCurrentScreen();
+      }, 600);
+    }
+
+    function handleChatAnswer(text, selectedOpt) {
+      const ce = sessionState.chatEngine;
+      ce.history.push({ role: 'user', text: text, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+      renderCurrentScreen();
+
+      // Show typing indicator
+      setTimeout(() => {
+        if (!ce.currentNode && !ce.tree) {
+          // First message - detect symptom category
+          const cat = detectSymptomCategory(text);
+          ce.tree = CHAT_TREES[cat];
+          ce.currentNode = ce.tree.nodes[ce.tree.start];
+        } else if (selectedOpt) {
+          // Option selected - advance tree
+          if (selectedOpt.b) ce.severityBump += selectedOpt.b;
+          if (selectedOpt.n) {
+            const next = ce.tree.nodes[selectedOpt.n];
+            if (next) {
+              if (next.verdict) {
+                ce.verdict = next.verdict;
+                if (ce.severityBump > 0 && ce.verdict.level) {
+                  ce.verdict.level = Math.max(1, ce.verdict.level - Math.floor(ce.severityBump));
+                }
+                ce.currentNode = null;
+              } else {
+                ce.currentNode = next;
+              }
+            }
+          }
+        } else if (ce.currentNode) {
+          // Free text - try to match to an option
+          const txt = text.toLowerCase();
+          let matched = null;
+          for (const opt of ce.currentNode.opts) {
+            if (txt.includes(opt.v) || txt.includes(opt.l.toLowerCase().split(' ')[0])) {
+              matched = opt; break;
+            }
+          }
+          if (!matched) matched = ce.currentNode.opts[ce.currentNode.opts.length - 1]; // fallback
+          if (matched.b) ce.severityBump += matched.b;
+          if (matched.n) {
+            const next = ce.tree.nodes[matched.n];
+            if (next) {
+              if (next.verdict) {
+                ce.verdict = next.verdict;
+                if (ce.severityBump > 0 && ce.verdict.level) {
+                  ce.verdict.level = Math.max(1, ce.verdict.level - Math.floor(ce.severityBump));
+                }
+                ce.currentNode = null;
+              } else {
+                ce.currentNode = next;
+              }
+            }
+          }
+        }
+
+        // Push AI response
+        if (ce.verdict) {
+          ce.history.push({ role: 'assistant', text: ce.verdict.summary });
+        } else if (ce.currentNode) {
+          ce.history.push({ role: 'assistant', text: ce.currentNode.q, options: ce.currentNode.opts });
+        }
+        renderCurrentScreen();
+      }, 500);
+    }
+
+    function applyVerdictToRoute() {
+      const v = sessionState.chatEngine.verdict;
+      if (!v || !v.route) return;
+      const route = ROUTES[v.route];
+      if (!route) return;
+      sessionState.pathContext.urgencyLevel = v.level;
+      sessionState.pathContext.severityColor = v.level === 1 ? 'error' : v.level === 2 ? 'warning' : v.level === 3 ? 'warning' : 'primary';
+      const summary = sessionState.chatEngine.history
+        .filter(h => h.role === 'user')
+        .map(h => h.text)
+        .join(' → ');
+      sessionState.pathContext.chatSummary = summary;
+      // Store detailed symptoms for booking script
+      sessionState.pathContext.chiefComplaint = v.summary;
+      sessionState.pathContext.symptomDetails = sessionState.chatEngine.history
+        .filter(h => h.role === 'user')
+        .map(h => h.text);
+    }
+
+    // ══════════════════════════════════════════
+    // HUB
+    // ══════════════════════════════════════════
+    function renderHub() {
+      const hasHistory = sessionState.pastRoutes.length > 0;
+      document.getElementById("phoneScreen").innerHTML = `
+        <div class="screen" style="background:var(--surface);padding:24px 16px;gap:16px;min-height:100%;">
+          <div style="text-align:center;">
+            <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--primary);">MediRoute</div>
+            <div style="font-size:12px;color:var(--on-surface-variant);">AI Medical Companion</div>
+          </div>
+          <div class="hub-search"><i class="ph ph-magnifying-glass" style="color:var(--on-surface-variant);"></i><input type="text" id="hubSearch" placeholder="Type a symptom or medication name..."></div>
+          ${CATEGORIES.map(cat => `
+            <div class="hub-category" data-category="${cat.id}" style="border-left:3px solid ${cat.color};">
+              <div class="hub-category-main" id="cat-main-${cat.id}">
+                <div style="flex:1;"><span style="font-size:20px;">${cat.icon}</span><span style="font-family:var(--font-display);font-weight:700;font-size:14px;margin-left:8px;">${cat.label}</span><span style="font-size:11px;color:var(--on-surface-variant);margin-left:6px;">[${cat.count}]</span></div>
+                <span class="hub-expand" id="cat-expand-${cat.id}" style="cursor:pointer;padding:4px 8px;">↗</span>
+              </div>
+              <div class="hub-submenu" id="cat-sub-${cat.id}" style="display:none;">
+                ${cat.routeOrder.map(rk => `<div class="hub-subitem" data-route="${rk}">● ${ROUTES[rk].label}</div>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+          ${hasHistory ? `
+            <div style="border-top:1px solid var(--outline);padding-top:12px;">
+              <div style="font-size:11px;color:var(--on-surface-variant);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Recent Sessions</div>
+              ${sessionState.pastRoutes.slice(-5).reverse().map(p => `
+                <div class="hub-recent" data-route="${p.route}"><span>✓</span><span>${ROUTES[p.route]?.label||p.route}</span><span style="color:var(--on-surface-variant);font-size:10px;margin-left:auto;">${timeAgo(p.timestamp)}</span></div>
+              `).join('')}
+            </div>
+          ` : ''}
+          <button class="btn-primary" id="hubNewSession" style="background:var(--surface);color:var(--on-surface-variant);border:1px solid var(--outline);">🔄 New Session</button>
+        </div>`;
+      bindHubEvents();
+    }
+
+    function timeAgo(ts) {
+      const sec = Math.floor((Date.now() - ts) / 1000);
+      if (sec < 60) return 'just now';
+      if (sec < 3600) return Math.floor(sec/60) + 'm ago';
+      return Math.floor(sec/3600) + 'h ago';
+    }
+
+    function bindHubEvents() {
+      document.querySelectorAll('.hub-category-main').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('.hub-expand')) return;
+          const catId = el.closest('.hub-category').dataset.category;
+          const cat = CATEGORIES.find(c => c.id === catId);
+          if (cat) startRoute(cat.routeOrder[0]);
+        });
+      });
+      document.querySelectorAll('.hub-expand').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const catId = el.id.replace('cat-expand-', '');
+          const sub = document.getElementById('cat-sub-' + catId);
+          const isOpen = sub.style.display !== 'none';
+          document.querySelectorAll('.hub-submenu').forEach(s => s.style.display = 'none');
+          document.querySelectorAll('.hub-expand').forEach(e => e.textContent = '↗');
+          if (!isOpen) { sub.style.display = 'block'; el.textContent = '✕'; }
+        });
+      });
+      document.querySelectorAll('.hub-subitem').forEach(el => {
+        el.addEventListener('click', (e) => { e.stopPropagation(); startRoute(el.dataset.route); });
+      });
+      document.querySelectorAll('.hub-recent').forEach(el => {
+        el.addEventListener('click', () => startRoute(el.dataset.route));
+      });
+      const searchInput = document.getElementById('hubSearch');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          const match = matchKeywordRoute(searchInput.value);
+          document.querySelectorAll('.hub-category').forEach(c => { c.style.opacity = match ? '0.4' : '1'; c.style.transition = 'opacity 200ms'; });
+          if (match) {
+            const catId = ROUTES[match].category;
+            const catEl = document.querySelector(`.hub-category[data-category="${catId}"]`);
+            if (catEl) { catEl.style.opacity = '1'; catEl.style.boxShadow = '0 0 0 2px var(--primary)'; }
+          }
+        });
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { const match = matchKeywordRoute(searchInput.value); if (match) startRoute(match); }
+        });
+      }
+      const newBtn = document.getElementById('hubNewSession');
+      if (newBtn) newBtn.addEventListener('click', () => { clearState(); renderHub(); });
+    }
+
+    function startRoute(routeKey) {
+      const route = ROUTES[routeKey];
+      if (!route) return;
+      sessionState.currentRoute = routeKey;
+      sessionState.currentStep = 0;
+      sessionState.visitedSteps = new Set([0]);
+      sessionState.pathContext = JSON.parse(JSON.stringify(route.ctx));
+      sessionState.pathContext.selectedClinic = null;
+      saveState();
+      updateTopBar();
+      renderCurrentScreen();
+      updateNavButtons();
+      updateStepIndicator();
+      updateSidebar();
+    }
+
+    // ══════════════════════════════════════════
+    // RENDERING & NAVIGATION
+    // ══════════════════════════════════════════
+    function renderCurrentScreen() {
+      const container = document.getElementById("phoneScreen");
+      const screenId = currentScreenId();
+      if (!screenId) return;
+      const template = SCREEN_TEMPLATES[screenId];
+      if (!template) return;
+      container.innerHTML = template(sessionState.pathContext);
+      container.scrollTop = 0;
+      bindScreenEvents(screenId);
+      renderProgressDots();
+    }
+
+    function bindScreenEvents(screenId) {
+      if (screenId === 'booking') {
+        const toggle = document.getElementById('romajiToggle');
+        if (toggle) toggle.addEventListener('click', () => {
+          sessionState.romajiVisible = !sessionState.romajiVisible;
+          const el = document.getElementById('romajiText');
+          if (el) el.style.display = sessionState.romajiVisible ? 'block' : 'none';
+          toggle.innerHTML = sessionState.romajiVisible ? '<i class="ph ph-eye-slash"></i> Hide Romaji' : '<i class="ph ph-eye"></i> Show Romaji';
+        });
+        // Mock booking flow
+        const callBtn = document.getElementById('btnCallClinic');
+        if (callBtn) {
+          callBtn.addEventListener('click', () => {
+            const status = document.getElementById('bookingStatus');
+            const bs2 = document.getElementById('bs2');
+            const bs3 = document.getElementById('bs3');
+            if (!status) return;
+            status.style.display = 'block';
+            callBtn.style.display = 'none';
+            setTimeout(() => { if (bs2) bs2.classList.add('active'); }, 1500);
+            setTimeout(() => { if (bs3) { bs3.classList.add('active'); showToast('✅ Appointment booked — see you soon!'); setTimeout(() => navigateTo(sessionState.currentStep + 1), 800); } }, 3000);
+          });
+        }
+      }
+      if (screenId === 'clinicSearch' || screenId === 'pharmacyFinder') {
+        document.querySelectorAll('.btn-select').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.dataset.clinicIndex);
+            const list = sessionState.pathContext.clinics || [];
+            if (list[idx]) { sessionState.pathContext.selectedClinic = list[idx]; renderCurrentScreen(); }
+          });
+        });
+        document.querySelectorAll('.clinic-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const idx = parseInt(card.dataset.clinicIndex);
+            const list = sessionState.pathContext.clinics || [];
+            if (!isNaN(idx) && list[idx]) { sessionState.pathContext.selectedClinic = list[idx]; renderCurrentScreen(); }
+          });
+        });
+      }
+      if (screenId === 'prescriptionUpload') {
+        const snapBtn = document.getElementById('btnSnapRx');
+        if (snapBtn) {
+          snapBtn.addEventListener('click', () => {
+            const result = document.getElementById('rxResult');
+            const camera = document.getElementById('rxCamera');
+            if (result) result.style.display = 'block';
+            if (camera) camera.style.opacity = '0.3';
+            snapBtn.textContent = '✅ Prescription Captured';
+            snapBtn.style.background = '#E6F4EA';
+            snapBtn.style.color = '#137333';
+            snapBtn.style.borderColor = '#137333';
+            showToast('📄 Prescription detected: ' + (sessionState.pathContext.newPrescription || 'Ciprofloxacin'));
+            setTimeout(() => navigateTo(sessionState.currentStep + 1), 1200);
+          });
+        }
+      }
+      if (screenId === 'pharmacyMatch') {
+        setTimeout(() => {
+          const ps2 = document.getElementById('ps2');
+          const ps3 = document.getElementById('ps3');
+          const result = document.getElementById('pharmacyResult');
+          if (ps2) setTimeout(() => ps2.classList.add('active'), 1000);
+          if (ps3) setTimeout(() => ps3.classList.add('active'), 2000);
+          if (result) setTimeout(() => { result.style.display = 'block'; }, 2500);
+        }, 500);
+        // Bind confirm button after delay
+        setTimeout(() => {
+          const confirmBtn = document.getElementById('btnConfirmRx');
+          if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+              showToast('📤 Prescription sent to pharmacy');
+              setTimeout(() => navigateTo(sessionState.currentStep + 1), 800);
+            });
+          }
+        }, 2600);
+      }
+      if (screenId === 'preTravelInput') {
+        const btn = document.getElementById('btnCheckMeds');
+        if (btn) btn.addEventListener('click', () => {
+          const sel = document.getElementById('preMeds').value;
+          const result = document.getElementById('preTravelResultDiv');
+          if (!sel) { showToast('⚠️ Please select a medication'); return; }
+          const prohibited = ['adderall','vyvanse','ritalin','sudafed','vicks'];
+          const restricted = ['codeine','xanax','valium'];
+          const safe = ['prozac','zoloft','concerta','insulin'];
+          let html = '';
+          if (prohibited.includes(sel)) {
+            html = '<div class="interaction-card interaction-critical" style="border-color:var(--error);background:#FFF5F5;text-align:left;"><div class="interaction-header" style="color:var(--error);"><i class="ph ph-prohibit"></i> PROHIBITED — Do NOT Bring</div><p style="font-size:13px;margin:8px 0;">Classified as controlled substance. Carrying → <strong>arrest at customs</strong>. Instead: visit a Japanese clinic for a local alternative prescription.</p></div>';
+          } else if (restricted.includes(sel)) {
+            html = '<div class="interaction-card" style="border-color:var(--warning);background:#FFFBF0;text-align:left;"><div class="interaction-header" style="color:#B06000;"><i class="ph ph-warning"></i> RESTRICTED — Yunyu Kakunin-sho Required</div><p style="font-size:13px;margin:8px 0;">Apply 2+ weeks before travel. Or: get a local prescription from a Japanese clinic instead.</p></div>';
+          } else {
+            html = '<div class="interaction-card" style="border-color:#34A853;background:#F6FEF6;text-align:left;"><div class="interaction-header" style="color:#137333;"><i class="ph ph-check-circle"></i> ✅ Legal to Bring</div><p style="font-size:13px;margin:8px 0;">Carry in original packaging with prescription. Declare if quantity exceeds 1 month supply.</p></div>';
+          }
+          if (result) { result.style.display = 'block'; result.innerHTML = html; }
+          showToast(prohibited.includes(sel)?'⛔ DO NOT bring this to Japan':restricted.includes(sel)?'⚠️ Permit required':'✅ Safe to bring');
+        });
+      }
+      if (screenId === 'costEducation') {
+        const btn = document.getElementById('btnAddInsurance');
+        if (btn) btn.addEventListener('click', () => jumpToScreen('insuranceInput'));
+        // Apply coverage data if stored
+        if (sessionState.pathContext.insuranceData) {
+          applyCoverageToCostCards(sessionState.pathContext.insuranceData);
+        }
+      }
+      if (screenId === 'insuranceInput') {
+        const provider = document.getElementById('insProvider');
+        const policyField = document.getElementById('policyField');
+        const coverageField = document.getElementById('coverageField');
+        if (provider) {
+          provider.addEventListener('change', () => {
+            const val = provider.value;
+            const show = val && val !== 'none';
+            if (policyField) policyField.style.display = show ? 'flex' : 'none';
+            if (coverageField) coverageField.style.display = show ? 'flex' : 'none';
+          });
+        }
+        const verifyBtn = document.getElementById('btnVerifyIns');
+        if (verifyBtn) {
+          verifyBtn.addEventListener('click', () => {
+            const prov = document.getElementById('insProvider').value;
+            const policy = document.getElementById('insPolicy')?.value || '';
+            const coverage = document.getElementById('insCoverage')?.value || 'comprehensive';
+            const result = document.getElementById('insResult');
+            const header = document.getElementById('insResultHeader');
+            const list = document.getElementById('insCoverageList');
+            if (!prov) { showToast('⚠️ Please select a provider'); return; }
+            if (prov === 'none') {
+              const data = { provider: 'None', ambulance: true, clinic: false, er: false, penalty: false, rx: false };
+              sessionState.pathContext.insuranceData = data;
+              if (result) result.style.display = 'block';
+              if (result) result.style.background = '#FFF5F5'; result.style.borderColor = 'var(--error)';
+              if (header) header.innerHTML = '😟 No Insurance Coverage';
+              if (list) list.innerHTML = '<div class="ins-coverage-item"><span>🚑 Ambulance</span><span class="cov-yes">✅ Free</span></div><div class="ins-coverage-item"><span>🏥 Clinic</span><span class="cov-no">❌ You pay ¥5,000-15,000</span></div><div class="ins-coverage-item"><span>🏨 ER Visit</span><span class="cov-no">❌ You pay ¥36,000-59,000</span></div><div class="ins-coverage-item"><span>⚠️ Walk-in Penalty</span><span class="cov-no">❌ You pay ¥7,000-11,000</span></div><div class="ins-coverage-item"><span>💊 Prescriptions</span><span class="cov-no">❌ You pay ¥1,000-5,000</span></div>';
+            } else {
+              const cov = coverage === 'comprehensive';
+              const data = { provider: prov, policy, coverage, ambulance: true, clinic: cov, er: cov, penalty: cov, rx: cov || coverage === 'medical' };
+              sessionState.pathContext.insuranceData = data;
+              if (result) { result.style.display = 'block'; result.style.background = '#F6FEF6'; result.style.borderColor = '#34A853'; }
+              if (header) header.innerHTML = '✅ ' + (prov==='allianz'?'Allianz Travel':prov==='sompo'?'Sompo Japan':prov==='nomads'?'World Nomads':prov==='axa'?'AXA Travel':'Your provider') + ' · ' + (coverage==='comprehensive'?'Comprehensive':'Medical') + (policy?' · ' + policy:'');
+              const items = [
+                {label:'🚑 Ambulance', cov:true, yes:'✅ Free', no:'❌'},
+                {label:'🏥 Clinic', cov:cov, yes:'✅ Covered · pay upfront, get reimbursed', no:'⚠️ Partial'},
+                {label:'🏨 ER Visit', cov:cov, yes:'✅ Covered · labs, CT, meds', no:'⚠️ Partial'},
+                {label:'⚠️ Walk-in Penalty', cov:cov, yes:'✅ Covered if emergency', no:'⚠️ You pay ¥7,000-11,000'},
+                {label:'💊 Prescriptions', cov:cov||coverage==='medical', yes:'✅ Covered', no:'⚠️ You pay ¥1,000-5,000'},
+              ];
+              if (list) list.innerHTML = items.map(i => `<div class="ins-coverage-item"><span>${i.label}</span><span class="${i.cov?'cov-yes':'cov-partial'}">${i.cov?i.yes:i.no}</span></div>`).join('');
+            }
+            showToast(prov==='none'?'⚠️ No coverage — save all receipts':'✅ Coverage verified');
+            sessionState.pathContext.hasInsurance = prov !== 'none';
+            setTimeout(() => { sessionState.currentStep = sessionState.currentStep - 1; renderCurrentScreen(); }, 2000);
+          });
+        }
+      }
+      if (screenId === 'call119') {
+        const steps = ['ecs1','ecs2','ecs3','ecs4'];
+        const labels = ['📞 Dialing emergency services...','🔗 Connected to operator','📋 Sharing your location','🚑 Ambulance dispatched'];
+        let i = 0;
+        const timer = document.getElementById('ecTimer');
+        let sec = 0;
+        const tId = setInterval(() => { sec++; if (timer) timer.textContent = '00:' + String(sec).padStart(2,'0'); }, 1000);
+        const iv = setInterval(() => {
+          if (i < steps.length) {
+            document.getElementById(steps[i])?.classList.add('active');
+            if (i > 0) document.getElementById(steps[i-1])?.classList.remove('active');
+            i++;
+          } else {
+            clearInterval(iv); clearInterval(tId);
+            const status = document.getElementById('ecStatus');
+            if (status) status.textContent = '🚑 Ambulance Dispatched';
+            document.getElementById('ecInstructions').style.display = 'block';
+            document.getElementById('ecTranslate').style.display = 'block';
+            if (timer) timer.textContent = 'ETA ~7 min';
+            showToast('🚑 Ambulance is on the way!');
+          }
+        }, 1200);
+      }
+      if (screenId === 'drugInteractionInput') {
+        const btn = document.getElementById('checkInteractions');
+        if (btn) btn.addEventListener('click', () => navigateTo(sessionState.currentStep + 1));
+      }
+      if (screenId === 'intake' || screenId === 'intakeForm') {
+        const scanBtn = document.getElementById('btnScanForm');
+        if (scanBtn) {
+          scanBtn.addEventListener('click', () => {
+            const overlay = document.getElementById('scanOverlay');
+            const scanText = document.getElementById('scanText');
+            const formCard = document.getElementById('intakeFormCard');
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            scanBtn.style.display = 'none';
+            // Animate scan
+            const steps = ['📸 Capturing form...', '🔍 Detecting Japanese fields...', '🌐 Translating — 名前 → Name, 症状 → Symptoms...', '✍️ Auto-filling from your health profile...', '✅ Form ready!'];
+            let i = 0;
+            const iv = setInterval(() => {
+              if (i < steps.length) { scanText.textContent = steps[i]; i++; }
+              else {
+                clearInterval(iv);
+                setTimeout(() => {
+                  overlay.style.display = 'none';
+                  scanBtn.style.display = 'block';
+                  scanBtn.innerHTML = '<i class="ph ph-check-circle"></i> ✅ Form Translated & Filled';
+                  scanBtn.style.background = '#E6F4EA';
+                  scanBtn.style.color = '#137333';
+                  scanBtn.style.borderColor = '#137333';
+                  if (formCard) { formCard.style.borderColor = '#34A853'; formCard.style.boxShadow = '0 0 0 3px rgba(52,168,83,0.15)'; }
+                  showToast('✅ Form auto-filled from your health profile');
+                }, 300);
+              }
+            }, 700);
+          });
+        }
+        const translateBtn = document.getElementById('btnStartTranslate');
+        if (translateBtn) {
+          translateBtn.addEventListener('click', () => navigateTo(sessionState.currentStep + 1));
+        }
+      }
+      if (screenId === 'chat') {
+        const input = document.getElementById('chatInput');
+        const send = document.getElementById('chatSend');
+        const ce = sessionState.chatEngine;
+
+        // Start chat if first visit
+        if (ce.history.length === 0 && !ce.currentNode) {
+          initChat();
+        }
+
+        // Scroll to bottom
+        const msgContainer = document.getElementById('chatMessages');
+        if (msgContainer) msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Option button clicks
+        document.querySelectorAll('.chat-option:not(.chat-option-type)').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            const node = ce.currentNode;
+            if (!node) return;
+            const opt = node.opts[idx];
+            if (!opt) return;
+            handleChatAnswer(opt.l, opt);
+          });
+        });
+
+        // Type instead
+        const typeBtn = document.getElementById('typeInstead');
+        if (typeBtn) {
+          typeBtn.addEventListener('click', () => {
+            const bar = document.getElementById('chatInputBar');
+            if (bar) bar.style.display = 'flex';
+            document.querySelectorAll('.chat-options').forEach(el => el.style.display = 'none');
+            if (input) input.focus();
+          });
+        }
+
+        // Verdict continue
+        const vc = document.getElementById('verdictContinue');
+        if (vc) {
+          vc.addEventListener('click', () => {
+            if (ce.verdict && ce.verdict.route) {
+              applyVerdictToRoute();
+              navigateTo(sessionState.currentStep + 1);
+            }
+          });
+        }
+
+        // Send handler
+        const handler = () => {
+          const text = input.value.trim();
+          if (!text) return;
+          input.value = '';
+          handleChatAnswer(text);
+        };
+        if (send) send.addEventListener('click', handler);
+        if (input) {
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handler();
+            // Escalation keywords
+            if (/worse|getting worse|more pain|severe|can't breathe now|can't breath/i.test(e.target.value)) {
+              if (ce.severityBump < 3) ce.severityBump += 1;
+            }
+          });
+        }
+      }
+    }
+
+    function navigateTo(index) {
+      if (sessionState.isTransitioning) return;
+      if (!currentRouteData()) return;
+      const total = totalSteps();
+      if (index < 0 || index >= total) return;
+
+      sessionState.isTransitioning = true;
+      sessionState.visitedSteps.add(index);
+
+      const screen = document.getElementById("phoneScreen");
+      screen.classList.add('screen-exit');
+
+      setTimeout(() => {
+        sessionState.currentStep = index;
+        renderCurrentScreen();
+        updateNavButtons();
+        updateStepIndicator();
+        updateSidebar();
+        saveState();
+
+        screen.classList.remove('screen-exit');
+        screen.classList.add('screen-enter');
+        setTimeout(() => { screen.classList.remove('screen-enter'); sessionState.isTransitioning = false; }, 150);
+      }, 150);
+    }
+
+    function updateNavButtons() {
+      const backBtn = document.getElementById('backBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const nextLabel = nextBtn.querySelector('.nav-label');
+      if (!currentRouteData()) { backBtn.disabled = true; nextBtn.disabled = true; return; }
+      backBtn.disabled = sessionState.currentStep === 0;
+      nextBtn.disabled = false;
+      if (sessionState.currentStep === totalSteps() - 1) {
+        nextLabel.textContent = sessionState.lang === 'jp' ? '再スタート' : 'Restart';
+        nextBtn.querySelector('i').className = 'ph ph-arrow-counter-clockwise';
+      } else {
+        nextLabel.textContent = sessionState.lang === 'jp' ? '次へ' : 'Next';
+        nextBtn.querySelector('i').className = 'ph ph-arrow-right';
+      }
+    }
+
+    function updateStepIndicator() {
+      const el = document.getElementById('stepIndicator');
+      if (!sessionState.currentRoute) { el.textContent = ''; return; }
+      el.textContent = `${sessionState.lang === 'jp' ? 'ステップ' : 'Step'} ${sessionState.currentStep + 1}/${totalSteps()}`;
+    }
+
+    function updateTopBar() {
+      const logo = document.querySelector('.logo');
+      if (sessionState.currentRoute) {
+        logo.innerHTML = '<span style="cursor:pointer;" id="hubHomeBtn">🏠</span> MediRoute';
+      } else {
+        logo.textContent = 'MediRoute';
+      }
+    }
+
+    function renderProgressDots() {
+      const container = document.getElementById('progressDots');
+      container.innerHTML = '';
+      if (!currentRouteData()) return;
+      for (let i = 0; i < totalSteps(); i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if (i === sessionState.currentStep) dot.classList.add('current');
+        else if (sessionState.visitedSteps.has(i)) dot.classList.add('visited');
+        if (sessionState.visitedSteps.has(i)) dot.addEventListener('click', () => navigateTo(i));
+        container.appendChild(dot);
+      }
+    }
+
+    function showToast(message) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.getElementById('phoneScreen').appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('toast-visible'));
+      setTimeout(() => { toast.classList.remove('toast-visible'); setTimeout(() => toast.remove(), 300); }, 2000);
+    }
+
+    function goToHub() {
+      if (sessionState.currentRoute) {
+        sessionState.pastRoutes.push({
+          route: sessionState.currentRoute,
+          label: ROUTES[sessionState.currentRoute]?.label || sessionState.currentRoute,
+          clinic: sessionState.pathContext.selectedClinic?.name || null,
+          timestamp: Date.now(),
+        });
+      }
+      sessionState.currentRoute = null;
+      sessionState.currentStep = 0;
+      sessionState.visitedSteps = new Set();
+      saveState();
+      updateTopBar();
+      updateNavButtons();
+      updateStepIndicator();
+      renderHub();
+    }
+
+    // ══════════════════════════════════════════
+    // SIDEBAR
+    // ══════════════════════════════════════════
+    function updateSidebar() {
+      const screenId = currentScreenId();
+      const body = document.getElementById('sidebarBody');
+      const data = SIDEBAR_DATA[screenId];
+      if (data) { body.innerHTML = data; }
+      else { body.innerHTML = '<p class="sidebar-empty">No AI call for this step — static content shown to user.</p>'; }
+    }
+
+    const SIDEBAR_DATA = {
+      chat: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Analyzed symptoms against JTAS triage protocol.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>triageAssessment({symptoms, language})</code></div><div class="sidebar-item"><div class="sidebar-label">Latency</div><p>~0.6s</p></div><div class="sidebar-item"><div class="sidebar-label">Source</div><p>Gemini 2.5 Flash</p></div>`,
+      triageEmergency: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Severity 1 — chest pain + dyspnea = emergency requiring 119 call.</p></div><div class="sidebar-item"><div class="sidebar-label">Output</div><code>Structured output (JSON schema)</code></div><div class="sidebar-item"><div class="sidebar-label">Source</div><p>JTAS clinical protocol</p></div>`,
+      triageUrgent: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Severity 2-3 — urgent but not life-threatening. Clinic visit today.</p></div><div class="sidebar-item"><div class="sidebar-label">Output</div><code>Structured output (JSON schema)</code></div>`,
+      triageMild: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Severity 4 — semi-urgent. Monitor 48h.</p></div>`,
+      clinicSearch: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Searched facilities near Shinjuku — filtered by specialty + language.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>searchFacilities({specialty, location, language})</code></div><div class="sidebar-item"><div class="sidebar-label">Latency</div><p>~0.4s</p></div><div class="sidebar-item"><div class="sidebar-label">Source</div><p>Google Maps Grounding</p></div>`,
+      booking: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Generated polite Japanese script for clinic context.</p></div><div class="sidebar-item"><div class="sidebar-label">Method</div><code>Text generation (polite Japanese, medical context)</code></div>`,
+      drugInteraction: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Cross-referenced current meds + new prescription.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>checkDrugInteractions({currentMeds, newPrescription})</code></div>`,
+      drugProhibited: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Matched drug against MHLW prohibited substances list.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>checkDrugLegality({drugName, country:"JP"})</code></div>`,
+      drugRestricted: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Matched drug against controlled substances + permit eligibility.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>checkDrugLegality()</code></div>`,
+      pharmacyFinder: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Searched pharmacies near user location.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>searchFacilities({specialty:"pharmacy", location})</code></div><div class="sidebar-item"><div class="sidebar-label">Source</div><p>Google Maps Grounding</p></div>`,
+      receipt: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Extracted Japanese receipt fields via multimodal vision.</p></div><div class="sidebar-item"><div class="sidebar-label">Method</div><code>Vision: generateContent({image, prompt:"extract fields"})</code></div><div class="sidebar-item"><div class="sidebar-label">Latency</div><p>~0.8s</p></div><div class="sidebar-item"><div class="sidebar-label">Source</div><p>Gemini 2.5 Flash (multimodal)</p></div>`,
+      liveTranslation: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Streaming bidirectional speech translation.</p></div><div class="sidebar-item"><div class="sidebar-label">API</div><code>Gemini 3.5 Live Translate (WebSocket)</code></div><div class="sidebar-item"><div class="sidebar-label">Latency</div><p>~0.3s end-to-end</p></div>`,
+      drugInteractionInput: `<div class="sidebar-item"><div class="sidebar-label">What it did</div><p>Preparing interaction matrix for current meds + new prescription.</p></div><div class="sidebar-item"><div class="sidebar-label">Function</div><code>checkDrugInteractions()</code></div>`,
+    };
+
+    // ══════════════════════════════════════════
+    // GLOBAL EVENTS & INIT
+    // ══════════════════════════════════════════
+    function bindGlobalEvents() {
+      document.getElementById('backBtn').addEventListener('click', () => {
+        if (sessionState.currentStep > 0) navigateTo(sessionState.currentStep - 1);
+      });
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (!currentRouteData()) return;
+        if (sessionState.currentStep === totalSteps() - 1) {
+          sessionState.visitedSteps.clear();
+          sessionState.visitedSteps.add(0);
+          sessionState.currentStep = 0;
+          renderCurrentScreen();
+          updateNavButtons();
+          updateStepIndicator();
+          return;
+        }
+        navigateTo(sessionState.currentStep + 1);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (currentRouteData() && sessionState.currentStep < totalSteps() - 1) navigateTo(sessionState.currentStep + 1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (sessionState.currentStep > 0) navigateTo(sessionState.currentStep - 1);
+        } else if (e.key === 'r' || e.key === 'R') {
+          if (e.shiftKey) { clearState(); renderHub(); updateTopBar(); updateNavButtons(); updateStepIndicator(); }
+          else if (currentRouteData()) { sessionState.visitedSteps.clear(); sessionState.visitedSteps.add(0); sessionState.currentStep = 0; renderCurrentScreen(); updateNavButtons(); updateStepIndicator(); }
+        } else if (e.key === '0' || e.key === 'h' || e.key === 'H') {
+          e.preventDefault(); goToHub();
+        } else if (e.key >= '1' && e.key <= '5') {
+          e.preventDefault();
+          const idx = parseInt(e.key) - 1;
+          if (CATEGORIES[idx]) startRoute(CATEGORIES[idx].routeOrder[0]);
+        }
+      });
+      document.getElementById('langToggle').addEventListener('click', () => {
+        sessionState.lang = sessionState.lang === 'en' ? 'jp' : 'en';
+        document.getElementById('langToggle').textContent = sessionState.lang === 'en' ? '🌐 EN' : '🌐 JP';
+        updateNavButtons();
+        updateStepIndicator();
+        saveState();
+      });
+      document.getElementById('techToggle').addEventListener('click', () => {
+        document.getElementById('techSidebar').classList.toggle('visible');
+      });
+      document.getElementById('sidebarClose').addEventListener('click', () => {
+        document.getElementById('techSidebar').classList.remove('visible');
+      });
+      document.querySelector('.top-bar-left').addEventListener('click', (e) => {
+        if (e.target.id === 'hubHomeBtn' || e.target.closest('#hubHomeBtn')) goToHub();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const hasSaved = loadState();
+      if (hasSaved && sessionState.currentRoute) {
+        document.getElementById("phoneScreen").innerHTML = `
+          <div class="screen screen-transition">
+            <div class="transition-icon">📱</div>
+            <h2>Continue where you left off?</h2>
+            <p style="font-size:13px;color:var(--on-surface-variant);">${ROUTES[sessionState.currentRoute]?.label||'Previous session'} — Step ${sessionState.currentStep+1}/${totalSteps()}</p>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+              <button class="btn-primary" id="resumeYes">Yes, continue</button>
+              <button class="btn-primary" id="resumeNo" style="background:var(--surface);color:var(--on-surface);border:1px solid var(--outline);">Start fresh</button>
+            </div>
+          </div>`;
+        document.getElementById('resumeYes').addEventListener('click', () => { updateTopBar(); renderCurrentScreen(); updateNavButtons(); updateStepIndicator(); updateSidebar(); });
+        document.getElementById('resumeNo').addEventListener('click', () => { clearState(); renderHub(); updateTopBar(); updateNavButtons(); updateStepIndicator(); });
+      } else {
+        clearState();
+      sessionState.chatEngine = { tree: null, currentNode: null, history: [], verdict: null, severityBump: 0, detectedMeds: [] };
+        renderHub();
+        updateTopBar();
+        updateNavButtons();
+        updateStepIndicator();
+      }
+      bindGlobalEvents();
+    });
+  </script>
+</body>
+</html>

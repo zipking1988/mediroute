@@ -1,0 +1,14 @@
+{
+  "name": "agent-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "^0.79.10",
+    "@earendil-works/pi-ai": "^0.79.10",
+    "typebox": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest"
+  }
+}

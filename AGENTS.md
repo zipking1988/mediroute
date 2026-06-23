@@ -1,0 +1,132 @@
+# MediRoute Agents
+
+You have **4 agents** available. Just tell me which role to play — I switch into that agent's prompt, search the web via `agent-reach`, and give you evidence-backed answers.
+
+## Your Agents
+
+| Agent | What it does | How to invoke |
+|-------|-------------|---------------|
+| 🕵️ **Gap Analyst** | Finds missing info, risks, blind spots | "Act as the gap agent: what am I missing about X?" |
+| 🔧 **Tech Architect** | Recommends Gemini APIs, stack, architecture | "Act as the tech agent: which Gemini model for Y?" |
+| 🎤 **Pitch Coach** | Demo flow, pitch deck, judge Q&A | "Act as the pitch agent: give me an opening hook" |
+| ✅ **Fact Checker** | Verifies claims with live web search | "Fact-check: [claim]" |
+
+## How It Works
+
+Each agent is a **separate mental mode** with its own system prompt. I search the web via Exa (`mcporter`) + Jina Reader (`curl r.jina.ai`), cross-reference sources, and deliver a verdict with evidence.
+
+## Examples
+
+```
+"Fact-check: Japan hospitals can refuse walk-in patients but must accept ambulance patients"
+"Act as the tech agent: can Gemini Live API handle real-time medical translation?"
+"Act as the gap agent: what regulatory issues for a medical AI app in Japan?"
+"Act as the pitch agent: give me a 30-second demo opening"
+```
+
+## Interactive Mock
+
+**File:** [`mediroute-mock.html`](mediroute-mock.html) — single-file, open in any browser.
+
+A clickable 15-path prototype simulating MediRoute's full product flow. Hub entry → choose scenario → walk through screens. All pre-scripted, no backend.
+
+### Quick start
+
+```bash
+open mediroute-mock.html
+```
+
+### Keyboard shortcuts for demos
+
+| Key | Action |
+|-----|--------|
+| `1-5` | Jump to category (Emergency / Clinic / Medication / Translation / Cost) |
+| `← →` | Navigate within a route |
+| `H` / `0` | Return to hub |
+| `R` | Restart current route |
+| `Shift+R` | New session (clear history) |
+
+### 10 demo routes
+
+| Category | Routes |
+|----------|--------|
+| 🚨 Emergency | Chest Pain, Bleeding, Head Injury, Child Emergency |
+| 🏥 Clinic | Fever/Flu, Mild Symptoms, Injury, Dental |
+| 💊 Medication | Get a Prescription, Drug Interaction, Lost Medication, Pre-Travel Check |
+| 🗣️ Translation | Pharmacy Translation, Doctor Visit Translation |
+| 💰 Cost & Admin | Coverage → Insurance → Receipt → Visa Warning |
+
+### Emergency flow (5 screens)
+
+```
+Hub → Chat Triage → Triage Result → 📞 Call 119 → 🚑 Help is on the way → 🏠 End
+```
+
+### Clinic visit flow (18 screens)
+
+```
+Hub → Chat Triage → Triage → 💰 Coverage → 🛡️ Insurance → Clinic Search → 📞 Booking
+  → ✅ Confirmed → 🏥 Arrival → 📋 Intake (📸 scan + auto-fill) → 🎤 Live Translate
+  → 💊 Rx Upload → 🔍 Pharmacy Match → 📦 Pickup Ready → ⚠️ Drug Check
+  → 📸 Receipt → 📋 Claim Generated → 🎉 End
+```
+
+### Medication flow
+
+| Route | Screens |
+|-------|---------|
+| **Get a Prescription** | Past Visits (4 clinics) → Clinic Detail → 📋 処方箋 (4 meds, clickable) → Pharmacist → End |
+| **Drug Interaction** | Input meds → Critical Alert → Pharmacist Translate → End |
+| **Lost Medication** | Pharmacy Finder → Replacement Script → Booking → Confirmed → End |
+| **Pre-Travel Check** | Select medication → 🟢 Safe / 🟡 Restricted / 🔴 Prohibited → End |
+
+### Translation flow (2 routes)
+
+| Route | Screens |
+|-------|---------|
+| **Pharmacy** | Live Translation → Receipt → End |
+| **Doctor Visit** | Live Translation → Common Phrases (10 phrases) → End |
+
+### Cost & Admin flow
+
+```
+Coverage Cards → Insurance Input (provider + policy + coverage type) → Insurance Explainer → Receipt Preview → Visa Warning → End
+```
+
+### Interactive features
+- **Hub search** — type symptoms ("chest pain", "fever", "adderall", "how much") → auto-matches route
+- **Chat triage** — 10 symptom trees with branching questions, contextual verdict + confidence
+- **🛡️ Insurance input** — select provider + policy + coverage → per-item cost cards green/red
+- **Clinic picker** — click any clinic card → downstream screens update
+- **📞 Mock booking** — 3-step call animation (Calling → Speaking → Booked!) → auto-transition
+- **📸 Scan & Translate** — mock camera scans 問診票, translates fields, auto-fills from chat
+- **🗣️ Contextual Live Translation** — phrases adapt to symptoms (fever, chest pain, headache, etc.)
+- **💊 Prescription → Pharmacy** — snap Rx → auto-detect drug → pharmacy → pickup code + map
+- **📋 処方箋** — realistic Japanese prescription with 4 meds, clickable dosage/usage details
+- **📋 Claim Generator** — receipt → structured claim form → download/send to insurer
+- **🏠 Back buttons** — every screen has a way back (Back / Back to Main Page)
+- **localStorage** — session survives refresh, shows "Continue?" prompt
+
+## Reference Docs
+
+| File | What |
+|------|------|
+| [`mediroute-mock.html`](mediroute-mock.html) | 🎮 **Interactive mock v2** — 15-path phone frame simulator |
+| [`docs/hackathon-master.md`](docs/hackathon-master.md) | 🏆 **Hackathon master doc** — all 5 verified docs consolidated |
+| [`docs/product-spec.md`](docs/product-spec.md) | Full MediRoute product spec (8 modules) |
+| [`docs/tech-plan.md`](docs/tech-plan.md) | Generated tech plan + stack recommendations |
+| [`docs/market-landscape-verified.md`](docs/market-landscape-verified.md) | Market landscape & competitive analysis (fact-checked ✅) |
+| [`docs/data-feasibility-verified.md`](docs/data-feasibility-verified.md) | Data & feasibility — API stack verified ✅ |
+| [`docs/impact-metrics-corrected.md`](docs/impact-metrics-corrected.md) | Impact & metrics — corrected version (math fixed ✅) |
+| [`docs/user-personas-validation-verified.md`](docs/user-personas-validation-verified.md) | User personas & problem validation (fact-checked ✅) |
+| [`docs/user-segments-pain-points-verified.md`](docs/user-segments-pain-points-verified.md) | Target users & pain points (fact-checked ✅) |
+| [`docs/superpowers/specs/2026-06-23-mediroute-mock-design.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-design.md) | v1 mock design spec |
+| [`docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md`](docs/superpowers/specs/2026-06-23-mediroute-mock-v2-design.md) | v2 mock design spec (15 paths) |
+| [`docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md`](docs/superpowers/plans/2026-06-23-mediroute-mock-v2.md) | v2 implementation plan |
+
+## Setup
+
+- **Model**: DeepSeek (deepseek-v4-pro) via pi
+- **Web search**: agent-reach (Exa semantic search + Jina Reader)
+- **Session**: Isolated per agent — no context pollution
+- **Mock**: Open `mediroute-mock.html` in browser — no server needed
